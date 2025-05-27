@@ -17,14 +17,14 @@ jobs:
       with: 
         runner_type: ${{ env.runner_label }}
   type_check:
-      uses: AllenNeuralDynamics/github-workflows/workflows/type.yml@main
+      uses: AllenNeuralDynamics/github-workflows/.github/workflows/type.yml@main
       with: 
         runner_type: ${{ env.runner_label }}
 
   # Run unit tests if lint and type check passes
   tests:
     needs: [lint_check, type_check]
-    uses: AllenNeuralDynamics/github-workflows/workflows/test.yml@main
+    uses: AllenNeuralDynamics/github-workflows/.github/workflows/test.yml@main
     with: 
       runner_type: ${{ env.runner_label }}
   
