@@ -1,0 +1,11 @@
+{
+    "name": "Tag and Publish",
+    "description": "Tag and publish project to local devpi",
+    "iconName": "example-icon",
+    "categories": [
+        "Python", "Publish"
+    ],
+    "filePatterns": [
+        "uv.lock"
+    ]
+}

@@ -4,6 +4,7 @@ on:
   pull_request: 
     branches: 
       - $default-branch
+      - dev
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs: 
@@ -11,17 +12,17 @@ jobs:
   lint_check:
     uses: AllenNeuralDynamics/github-workflows/.github/workflows/lint.yml@main
     # with: 
-    #   runner_type: self-hosted-good # TODO: need to implement organization-level self-hosted runner
+    #   runner_label: self-hosted-good # TODO: need to implement organization-level self-hosted runner
 
   type_check:
     uses: AllenNeuralDynamics/github-workflows/.github/workflows/type.yml@main
     # with: 
-    #   runner_type: self-hosted-good # TODO: need to implement organization-level self-hosted runner
+    #   runner_label: self-hosted-good # TODO: need to implement organization-level self-hosted runner
 
   # Run unit tests if lint and type check passes
   tests:
     needs: [lint_check, type_check]
     uses: AllenNeuralDynamics/github-workflows/.github/workflows/test.yml@main
     # with: 
-    #   runner_type: self-hosted-good # TODO: need to implement organization-level self-hosted runner
+    #   runner_label: self-hosted-good # TODO: need to implement organization-level self-hosted runner
   
