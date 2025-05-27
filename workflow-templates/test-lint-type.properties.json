@@ -1,0 +1,11 @@
+{
+    "name": "Test Lint and Type Workflow",
+    "description": "Test lint and type check for python",
+    "iconName": "example-icon",
+    "categories": [
+        "Python", "CI"
+    ],
+    "filePatterns": [
+        "uv.lock"
+    ]
+}
