@@ -10,18 +10,18 @@ jobs:
   # Lint check and Type check ran in parallel
   lint_check:
     uses: AllenNeuralDynamics/github-workflows/.github/workflows/lint.yml@main
-    with: 
-      runner_type: ${{ vars.runner_label }}
+    # with: 
+    #   runner_type: self-hosted-good # TODO: need to implement organization-level self-hosted runner
 
   type_check:
     uses: AllenNeuralDynamics/github-workflows/.github/workflows/type.yml@main
     # with: 
-    #   runner_type: ${{ env.runner_label }}
+    #   runner_type: self-hosted-good # TODO: need to implement organization-level self-hosted runner
 
   # Run unit tests if lint and type check passes
   tests:
     needs: [lint_check, type_check]
     uses: AllenNeuralDynamics/github-workflows/.github/workflows/test.yml@main
     # with: 
-    #   runner_type: ${{ env.runner_label }}
+    #   runner_type: self-hosted-good # TODO: need to implement organization-level self-hosted runner
   
