@@ -1,7 +1,7 @@
 {
     "name": "Test Lint and Type Workflow",
     "description": "Test lint and type check for python",
-    "iconName": "example-icon",
+    "iconName": "mouse_robot",
     "categories": [
         "Python", "CI"
     ],
