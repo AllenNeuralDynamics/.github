@@ -1,8 +1,8 @@
-name: Tag and Publish (devpi)
+name: Tag and Publish (eng-tools release)
 
-on:
-  push:
-    branches:
+on: 
+  push: 
+    branches: 
       - $default-branch
       - 'dev'
 
@@ -14,10 +14,10 @@ jobs:
       runner_label: self-hosted-good
     secrets: inherit
 
-  # Publish to devpi on eng-tools
+  # Publish to eng-tools/release
   publish: 
     needs: tag
-    uses: AllenNeuralDynamics/github-workflows/.github/workflows/publish_devpi.yml@main
+    uses: AllenNeuralDynamics/github-workflows/.github/workflows/publish_executable.yml@main
     with: 
       runner_label: self-hosted-good
     secrets: inherit
