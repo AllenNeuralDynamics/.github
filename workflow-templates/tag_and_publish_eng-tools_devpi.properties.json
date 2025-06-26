@@ -1,5 +1,5 @@
 {
-    "name": "Tag and Publish",
+    "name": "Tag and Publish (devpi)",
     "description": "Tag and publish project to local devpi",
     "iconName": "mouse_robot",
     "categories": [
