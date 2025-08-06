@@ -9,7 +9,7 @@ on:
 jobs: 
   # Auto bump version and Tag
   tag: 
-    uses: AllenNeuralDynamics/github-workflows/.github/workflows/tag.yml@main
+    uses: AllenNeuralDynamics/.github/workflows/tag.yml@main
     with: 
       runner_label: self-hosted-good
     secrets: inherit
@@ -17,7 +17,7 @@ jobs:
   # Publish to devpi on eng-tools
   publish: 
     needs: tag
-    uses: AllenNeuralDynamics/github-workflows/.github/workflows/publish_devpi.yml@main
+    uses: AllenNeuralDynamics/.github/workflows/publish_devpi.yml@main
     with: 
       runner_label: self-hosted-good
     secrets: inherit
