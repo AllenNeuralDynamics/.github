@@ -6,7 +6,7 @@ on:
       runner_label: 
         description: 'Runner to use'
         type: string
-        default: 'self-hosted-good'
+        default: 'eng-tools'
 
 jobs:
   extract-info:

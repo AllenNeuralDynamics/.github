@@ -9,15 +9,15 @@ on:
 jobs: 
   # Auto bump version and Tag
   tag: 
-    uses: AllenNeuralDynamics/.github/workflows/tag.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/tag.yml@main
     with: 
-      runner_label: self-hosted-good
+      runner_label: eng-tools
     secrets: inherit
 
   # Publish to eng-tools/release
   publish: 
     needs: tag
-    uses: AllenNeuralDynamics/.github/workflows/publish_executable.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/publish_executable.yml@main
     with: 
-      runner_label: self-hosted-good
+      runner_label: eng-tools
     secrets: inherit

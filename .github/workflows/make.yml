@@ -1,0 +1,32 @@
+name: Run makefile
+
+on: 
+  workflow_call:
+    inputs: 
+      runner_label: 
+        description: 'Runner to use'
+        type: string
+        default: 'ubuntu-latest'
+
+jobs:
+  make: 
+    runs-on: ${{ inputs.runner_label }}
+    env: 
+      UV_PYTHON_INSTALL_DIR: C:\ProgramData\AIBS_MPE\uv_python
+      UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
+    steps:  
+      - name: Install UV
+        uses: astral-sh/setup-uv@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run makefile test
+        run: make test
+      - name: Run makefile lint
+        run: make lint
+      - name: Run makefile type
+        run: make type
+      - name: Run makefile build pkg
+        run: make build-pkg
+      - name: Run makefile build exe
+        run: make build-exe
+  
