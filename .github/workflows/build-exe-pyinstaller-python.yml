@@ -40,7 +40,7 @@ jobs:
       - name: Install pyinstaller
         run: uv add pyinstaller
       - name: Build Project with PyInstaller
-        run: uv pyinstaller --name ${{ env.PROJECT_NAME }} src/jessy-test/main.py # replace this with the path to your script
+        run: uv run pyinstaller --name ${{ env.PROJECT_NAME }} src/jessy-test/main.py # replace this with the path to your script
 
       - name: Create zip on Windows
         if: runner.os == 'Windows'
