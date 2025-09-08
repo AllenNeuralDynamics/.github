@@ -137,11 +137,11 @@ jobs:
       - name: Install PyInstaller
         run: uv add pyinstaller
       - name: Build project with PyInstaller (default)
-        if: ${{ inputs.pyinstaller_commands == '' }}
+        if: ${{ inputs.pyinstaller-commands == '' }}
         run: uv run pyinstaller --name ${{ needs.get_defaults.outputs.exe-name }} src/${{ needs.get_defaults.outputs.project-name }}/main.py 
       - name: Build project with PyInstaller (custom)
-        if: ${{ inputs.pyinstaller_commands != '' }}
-        run: uv run pyinstaller ${{ inputs.pyinstaller_commands }}
+        if: ${{ inputs.pyinstaller-commands != '' }}
+        run: uv run pyinstaller ${{ inputs.pyinstaller-commands }}
 
       ################################################################################
       #
