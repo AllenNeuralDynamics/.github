@@ -36,15 +36,13 @@ jobs:
       - name: Set PROJECT_NAME from extract_info (if not already set)
         id: set_project_name
         run: |
-          echo "PROJECT_NAME=${PROJECT_NAME:-${{ steps.extract_info.outputs.project-name }}}" >> "$GITHUB_ENV"
-        env:
-          PROJECT_NAME: ${{ env.PROJECT_NAME }}
+          PROJECT_NAME="${PROJECT_NAME:-${{ steps.extract_info.outputs.project-name }}}"
+          echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_ENV"
       - name: Set ZIP_NAME from extract_info (if not already set)
         id: set_zip_name
         run: |
-          echo "ZIP_NAME=${{ env.PROJECT_NAME}}" >> "$GITHUB_ENV"
-        env:
-          ZIP_NAME: ${{ env.ZIP_NAME }}
+          ZIP_NAME="${ZIP_NAME:-${{ steps.extract_info.outputs.project-name }}}"
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
 
       - name: Install UV 
         uses: astral-sh/setup-uv@v5
