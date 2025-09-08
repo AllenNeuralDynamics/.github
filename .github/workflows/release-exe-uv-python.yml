@@ -187,8 +187,8 @@ jobs:
       - name: Trigger gh-pull-agent to pull latest release from this repo to eng-tools
         shell: bash
         run: |
-          project_name = '${{ needs.publish.output.project-name }}'
-          project_version = '${{ needs.publish.output.project-version }}'
+          project_name = '${{ needs.publish.outputs.project-name }}'
+          project_version = '${{ needs.publish.outputs.project-version }}'
           owner_name = '"${{ github.repository_owner }}"'
           repo_name = '"${{ github.event.repository.name }}"'
           $json = @{
