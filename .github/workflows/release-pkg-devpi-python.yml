@@ -20,6 +20,8 @@ jobs:
       UV_PYTHON_INSTALL_DIR: C:\ProgramData\AIBS_MPE\uv_python
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Install UV 
         uses: astral-sh/setup-uv@v5
       - name: Build Project

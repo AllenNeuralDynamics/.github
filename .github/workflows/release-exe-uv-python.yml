@@ -31,8 +31,10 @@ jobs:
   #
   ################################################################################
   extract_info:
-    runs-on: ubuntu-latest
+    runs-on: input.
     steps: 
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Run extract_info only if PROJECT_NAME is not set
         # TODO: update to main after testing...
         uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
