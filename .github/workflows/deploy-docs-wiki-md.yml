@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - main
+      - dev
     paths:
       - '.github/docs/**'
+  workflow_dispatch:
 
 jobs:
   update-wiki:
