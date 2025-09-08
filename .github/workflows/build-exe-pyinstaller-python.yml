@@ -10,7 +10,7 @@ on:
       zip_name:
         description: 'Name of zip file'
         type: string
-      project_name:
+      exe_name:
         description: 'Name of executable'
         type: string
 
