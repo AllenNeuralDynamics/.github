@@ -49,7 +49,7 @@ jobs:
       - name: Clean before build (Windows)
         if: runner.os == 'Windows'
         run: |
-          Remove-Item -Recurse -Force build,dist,__pycache__,${{ env.ZIP_NAME }}.zip
+          Remove-Item -Recurse -Force build,dist,__pycache__,${{ env.ZIP_NAME }}.zip -ErrorAction SilentlyContinue
       - name: Clean before build (Linux/MacOS)
         if: runner.os != 'Windows'
         run: |
