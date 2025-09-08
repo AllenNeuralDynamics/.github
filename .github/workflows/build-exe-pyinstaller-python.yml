@@ -20,7 +20,7 @@ on:
 
 env: 
   EXE_NAME: ${{ inputs.exe-name }}      # if not set, it will be extracted from setup.py or pyproject.toml
-  ZIP_NAME: ${{ inputs.zip-name }}          # if not set, it will be extracted from EXE_NAME
+  ZIP_NAME: ${{ inputs.zip-name }}      # if not set, it will be extracted from EXE_NAME
 
 jobs:
   build: 
