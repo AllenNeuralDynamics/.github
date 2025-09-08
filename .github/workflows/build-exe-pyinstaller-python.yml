@@ -15,15 +15,14 @@ on:
         type: string
 
 env: 
-  ZIP_NAME: ${{ inputs.zip_name }}          # if not set, it will be extracted from setup.py or pyproject.toml
   PROJECT_NAME: ${{ inputs.project_name }}  # if not set, it will be extracted from setup.py or pyproject.toml
+  ZIP_NAME: ${{ inputs.zip_name }}          # if not set, it will be extracted from PROJECT_NAME
 
 jobs:
   build: 
     runs-on: ${{ inputs.runner_label }}
     outputs:
-      project-name: ${{ needs.extract-info.outputs.project-name }}
-      project-version: ${{ needs.extract-info.outputs.project-version }}
+      zip-name: ${{ steps.export.outputs.zip-name }}
     env: 
       UV_PYTHON_INSTALL_DIR: C:\ProgramData\AIBS_MPE\uv_python
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
@@ -44,13 +43,18 @@ jobs:
         run: |
           PROJECT_NAME="${PROJECT_NAME:-${{ steps.extract_info.outputs.project-name }}}"
           echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_ENV"
-      - name: Set ZIP_NAME from extract_info (if not already set)
+      - name: Set ZIP_NAME from PROJECT_NAME (if not already set)
         id: set_zip_name
         shell: bash
         run: |
           ZIP_NAME="${ZIP_NAME:-${{ env.PROJECT_NAME }}}"
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
-      
+
+      ################################################################################
+      #
+      #   CLEAN ANY PREVIOUS BUILDS
+      #
+      ################################################################################
       - name: Clean before build (Windows)
         if: runner.os == 'Windows'
         run: |
@@ -60,20 +64,32 @@ jobs:
         run: |
           rm -rf build dist __pycache__ *.spec ${{ env.ZIP_NAME }}.zip
 
+      ################################################################################
+      #
+      #   INSTALL DEPENDENCIES AND BUILD PROJECT (UV, PYINSTALLER)
+      #
+      ################################################################################
       - name: Install UV 
         uses: astral-sh/setup-uv@v5
       - name: Sync dependencies
         run: uv sync
-      - name: Install pyinstaller
+      - name: Install PyInstaller
         run: uv add pyinstaller
-      - name: Build Project with PyInstaller
+      - name: Build project with PyInstaller
         run: uv run pyinstaller --name ${{ env.PROJECT_NAME }} src/jessy-test/main.py # replace this with the path to your script
 
-      - name: Create zip on Windows
+      ################################################################################
+      #
+      #   CREATE ZIP FILE
+      #
+      ################################################################################
+      - name: Create zip (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: Compress-Archive -Path dist/* -DestinationPath "${{ env.ZIP_NAME }}.zip"
-      - name: Create zip on Linux/macOS
+      - name: Create zip (Linux/macOS)
         if: runner.os != 'Windows'
         run: zip -r "${{ env.ZIP_NAME }}.zip" dist/
-
+      - name: Export ZIP_NAME as output
+        id: export
+        run: echo "zip-name=${{ env.ZIP_NAME }}" >> $GITHUB_OUTPUT
