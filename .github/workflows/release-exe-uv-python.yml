@@ -45,13 +45,13 @@ jobs:
           PROJECT_NAME="${PROJECT_NAME:-${{ steps.extract_info.outputs.project-name }}}"
           echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_ENV"
       - name: Set PROJECT_VERSION from extract_info (if not already set)
-        id: set_project_name
+        id: set_project_version
         shell: bash
         run: |
           PROJECT_VERSION="${PROJECT_VERSION:-${{ steps.extract_info.outputs.project-version }}}"
           echo "PROJECT_VERSION=$PROJECT_VERSION" >> "$GITHUB_ENV"
       - name: Set TAG_NAME from extract_info (if not already set)
-        id: set_project_name
+        id: set_tag_name
         shell: bash
         run: |
           TAG_NAME="v${TAG_NAME:-${{ steps.extract_info.outputs.project-version }}}"
