@@ -45,6 +45,15 @@ jobs:
         run: |
           ZIP_NAME="${ZIP_NAME:-${{ steps.extract_info.outputs.project-name }}}"
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
+      
+      - name: Clean before build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Remove-Item -Recurse -Force build,dist,__pycache__,$env:PROJECT_NAME.exe,$env:ZIP_NAME.zip
+      - name: Clean before build (Linux/MacOS)
+        if: runner.os != 'Windows'
+        run: |
+          rm -rf build dist __pycache__ *.spec ${{ env.ZIP_NAME }}.zip
 
       - name: Install UV 
         uses: astral-sh/setup-uv@v5
@@ -62,3 +71,4 @@ jobs:
       - name: Create zip on Linux/macOS
         if: runner.os != 'Windows'
         run: zip -r "${{ env.ZIP_NAME }}.zip" dist/
+
