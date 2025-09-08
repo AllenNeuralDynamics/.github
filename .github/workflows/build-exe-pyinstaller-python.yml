@@ -7,9 +7,16 @@ on:
         description: 'Runner to use'
         type: string
         default: 'eng-tools'
+      zip_name:
+        description: 'Name of zip file'
+        type: string
+      project_name:
+        description: 'Name of executable'
+        type: string
 
 env: 
-  ZIP_NAME: '' # if not set, it will be extracted from setup.py or pyproject.toml
+  ZIP_NAME: ${{ inputs.zip_name }}          # if not set, it will be extracted from setup.py or pyproject.toml
+  PROJECT_NAME: ${{ inputs.project_name }}  # if not set, it will be extracted from setup.py or pyproject.toml
 
 jobs:
   build: 
@@ -25,13 +32,19 @@ jobs:
         # TODO: update to main after testing...
         uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
         id: extract_info
-        if: env.ZIP_NAME == ''
+        if: env.PROJECT_NAME == ''
       - name: Set PROJECT_NAME from extract_info (if not already set)
         id: set_project_name
         run: |
           echo "PROJECT_NAME=${PROJECT_NAME:-${{ steps.extract_info.outputs.project-name }}}" >> "$GITHUB_ENV"
         env:
           PROJECT_NAME: ${{ env.PROJECT_NAME }}
+      - name: Set ZIP_NAME from extract_info (if not already set)
+        id: set_zip_name
+        run: |
+          echo "ZIP_NAME=${{ env.PROJECT_NAME}}" >> "$GITHUB_ENV"
+        env:
+          ZIP_NAME: ${{ env.ZIP_NAME }}
 
       - name: Install UV 
         uses: astral-sh/setup-uv@v5
@@ -45,7 +58,7 @@ jobs:
       - name: Create zip on Windows
         if: runner.os == 'Windows'
         shell: powershell
-        run: Compress-Archive -Path dist/* -DestinationPath "${{ needs.extract-info.outputs.project-name }}.zip"
+        run: Compress-Archive -Path dist/* -DestinationPath "${{ env.ZIP_NAME }}.zip"
       - name: Create zip on Linux/macOS
         if: runner.os != 'Windows'
-        run: zip -r "${{ needs.extract-info.outputs.project-name }}.zip" dist/
+        run: zip -r "${{ env.ZIP_NAME }}.zip" dist/
