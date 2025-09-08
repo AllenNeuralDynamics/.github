@@ -28,11 +28,16 @@ jobs:
       UV_PYTHON_INSTALL_DIR: C:\ProgramData\AIBS_MPE\uv_python
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
     steps:
+      ################################################################################
+      #
+      #   SET PROJECT NAME AND ZIP NAME IF NOT PROVIDED
+      #
+      ################################################################################
       - name: Run extract_info only if PROJECT_NAME is not set
         # TODO: update to main after testing...
         uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
         id: extract_info
-        if: env.PROJECT_NAME == ''
+        if: env.PROJECT_NAME == '' 
       - name: Set PROJECT_NAME from extract_info (if not already set)
         id: set_project_name
         shell: bash
@@ -43,7 +48,7 @@ jobs:
         id: set_zip_name
         shell: bash
         run: |
-          ZIP_NAME="${ZIP_NAME:-${{ steps.extract_info.outputs.project-name }}}"
+          ZIP_NAME="${ZIP_NAME:-${{ env.PROJECT_NAME }}}"
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
       
       - name: Clean before build (Windows)
