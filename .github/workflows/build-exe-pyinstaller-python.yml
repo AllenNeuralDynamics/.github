@@ -7,10 +7,10 @@ on:
         description: 'Runner to use'
         type: string
         default: 'eng-tools'
-      zip_name:
+      zip-name:
         description: 'Name of zip file'
         type: string
-      exe_name:
+      exe-name:
         description: 'Name of executable'
         type: string
 
