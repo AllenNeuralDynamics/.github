@@ -13,6 +13,10 @@ on:
       exe-name:
         description: 'Name of executable'
         type: string
+    outputs:
+      zip-name: 
+        description: 'Name of zip archive created'
+        value: ${{ jobs.build.outputs.zip-name }}
 
 env: 
   EXE_NAME: ${{ inputs.exe-name }}      # if not set, it will be extracted from setup.py or pyproject.toml
