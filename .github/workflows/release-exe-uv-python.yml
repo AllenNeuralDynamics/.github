@@ -110,11 +110,11 @@ jobs:
       - name: Clean before build (Windows)
         if: runner.os == 'Windows'
         run: |
-          Remove-Item -Recurse -Force build,dist,__pycache__,${{ get_defaults.outputs.zip-name }}.zip -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force build,dist,__pycache__,${{ needs.get_defaults.outputs.zip-name }}.zip -ErrorAction SilentlyContinue
       - name: Clean before build (Linux/MacOS)
         if: runner.os != 'Windows'
         run: |
-          rm -rf build dist __pycache__ *.spec ${{ get_defaults.outputs.zip-name }}.zip
+          rm -rf build dist __pycache__ *.spec ${{ needs.get_defaults.outputs.zip-name }}.zip
 
       ################################################################################
       #
