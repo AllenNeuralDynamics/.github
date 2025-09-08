@@ -1,0 +1,36 @@
+name: Push Docs to Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/docs/**'
+
+jobs:
+  update-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v3
+
+      - name: Checkout wiki repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy new docs to wiki
+        run: |
+          mkdir -p wiki/Features
+          cp .github/docs/*.md wiki/Features/
+
+      - name: Commit & push to wiki
+        run: |
+          cd wiki
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Update wiki with new feature docs"
+          git push
