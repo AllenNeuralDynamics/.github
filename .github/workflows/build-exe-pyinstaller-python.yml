@@ -96,4 +96,5 @@ jobs:
         run: zip -r "${{ env.ZIP_NAME }}.zip" dist/
       - name: Export ZIP_NAME as output
         id: export
+        shell: bash
         run: echo "zip-name=${{ env.ZIP_NAME }}" >> $GITHUB_OUTPUT
