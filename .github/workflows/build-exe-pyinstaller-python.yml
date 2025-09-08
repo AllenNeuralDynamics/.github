@@ -1,0 +1,84 @@
+name: Build and Create exe Release
+
+on:
+  workflow_call:
+    inputs: 
+      runner_label: 
+        description: 'Runner to use'
+        type: string
+        default: 'eng-tools'
+
+jobs:
+  extract-info:
+    runs-on: ${{ inputs.runner_label }}
+    outputs:
+      project-name: ${{ steps.get_project_info.outputs.name }}
+      project-version: ${{ steps.get_project_info.outputs.version }}
+    steps:
+      - name: Extract project name from pyproject.toml
+        id: get_project_info
+        run: |
+          $content = Get-Content pyproject.toml
+          $name = ($content | Where-Object { $_ -match '^\s*name\s*=' }) -replace '.*=\s*"(.*)"', '$1'
+          $version = ($content | Where-Object { $_ -match '^\s*version\s*=' }) -replace '.*=\s*"(.*)"', '$1'
+          echo "Project Name: $name"
+          echo "Project Version: $version"
+          echo "name=$name" >> $env:GITHUB_OUTPUT
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+  build: 
+    runs-on: ${{ inputs.runner_label }}
+    needs: extract-info
+    outputs:
+      project-name: ${{ needs.extract-info.outputs.project-name }}
+      project-version: ${{ needs.extract-info.outputs.project-version }}
+    env: 
+      UV_PYTHON_INSTALL_DIR: C:\ProgramData\AIBS_MPE\uv_python
+      UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
+    steps:
+      - name: Install UV 
+        uses: astral-sh/setup-uv@v5
+      - name: Echo extracted project info
+        run: |
+          echo "Project Name: ${{ needs.extract-info.outputs.project-name }}"
+          echo "Project Version: ${{ needs.extract-info.outputs.project-version }}"
+      - name: Build Project with PyInstaller
+        run: uvx pyinstaller --name ${{ needs.extract-info.outputs.project-name }} src/jessy-test/main.py # replace this with the path to your script
+      - name: Create zip
+        run: |
+          Compress-Archive -Path dist/* -DestinationPath ${{ needs.extract-info.outputs.project-name }}.zip
+  
+  publish: 
+    runs-on: ${{ inputs.runner_label }}
+    needs: build 
+    outputs:
+      project-name: ${{ needs.build.outputs.project-name }}
+      project-version: ${{ needs.build.outputs.project-version }}
+    steps: 
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ needs.build.outputs.project-name }}.zip
+          tag_name: "v${{ needs.build.outputs.project-version }}"
+          body: "Automated release of ${{ needs.build.outputs.project-name }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  call-api:
+    runs-on: ${{ inputs.runner_label }}
+    needs: publish
+    steps: 
+      - name: Trigger gh-pull-agent to pull latest release from this repo on eng-tools
+        run: |
+          $project_name = '${{ needs.publish.outputs.project-name }}'
+          $project_version = '${{ needs.publish.outputs.project-version }}'
+          $owner_name = '"${{ github.repository_owner }}"'
+          $repo_name = '"${{ github.event.repository.name }}"'
+          $json = @{
+            '"owner_name"' = $owner_name
+            '"repo_name"' = $repo_name
+          } | ConvertTo-Json -Compress
+          & curl.exe -X PUT "http://eng-tools/gh-pull-agent/api/v1beta/releases/$project_name/$project_version" `
+            -H "accept: application/json" `
+            -H "Content-Type: application/json" `
+            -d $json
