@@ -64,6 +64,7 @@ jobs:
   ################################################################################
   publish: 
     runs-on: ${{ inputs.runner-label }}
+    needs: extract_info
     steps: 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
