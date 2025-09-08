@@ -15,8 +15,8 @@ on:
         type: string
 
 env: 
-  PROJECT_NAME: ${{ inputs.project_name }}  # if not set, it will be extracted from setup.py or pyproject.toml
-  ZIP_NAME: ${{ inputs.zip_name }}          # if not set, it will be extracted from PROJECT_NAME
+  EXE_NAME: ${{ inputs.project_name }}      # if not set, it will be extracted from setup.py or pyproject.toml
+  ZIP_NAME: ${{ inputs.zip_name }}          # if not set, it will be extracted from EXE_NAME
 
 jobs:
   build: 
@@ -32,22 +32,22 @@ jobs:
       #   SET PROJECT NAME AND ZIP NAME IF NOT PROVIDED
       #
       ################################################################################
-      - name: Run extract_info only if PROJECT_NAME is not set
+      - name: Run extract_info only if EXE_NAME is not set
         # TODO: update to main after testing...
         uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
         id: extract_info
-        if: env.PROJECT_NAME == '' 
-      - name: Set PROJECT_NAME from extract_info (if not already set)
+        if: env.EXE_NAME == '' 
+      - name: Set EXE_NAME from extract_info (if not already set)
         id: set_project_name
         shell: bash
         run: |
-          PROJECT_NAME="${PROJECT_NAME:-${{ steps.extract_info.outputs.project-name }}}"
-          echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_ENV"
-      - name: Set ZIP_NAME from PROJECT_NAME (if not already set)
+          EXE_NAME="${EXE_NAME:-${{ steps.extract_info.outputs.project-name }}}"
+          echo "EXE_NAME=$EXE_NAME" >> "$GITHUB_ENV"
+      - name: Set ZIP_NAME from EXE_NAME (if not already set)
         id: set_zip_name
         shell: bash
         run: |
-          ZIP_NAME="${ZIP_NAME:-${{ env.PROJECT_NAME }}}"
+          ZIP_NAME="${ZIP_NAME:-${{ env.EXE_NAME }}}"
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
 
       ################################################################################
@@ -76,7 +76,7 @@ jobs:
       - name: Install PyInstaller
         run: uv add pyinstaller
       - name: Build project with PyInstaller
-        run: uv run pyinstaller --name ${{ env.PROJECT_NAME }} src/jessy-test/main.py # replace this with the path to your script
+        run: uv run pyinstaller --name ${{ env.EXE_NAME }} src/jessy-test/main.py # replace this with the path to your script
 
       ################################################################################
       #
