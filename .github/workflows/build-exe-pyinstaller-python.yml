@@ -15,8 +15,8 @@ on:
         type: string
 
 env: 
-  EXE_NAME: ${{ inputs.project_name }}      # if not set, it will be extracted from setup.py or pyproject.toml
-  ZIP_NAME: ${{ inputs.zip_name }}          # if not set, it will be extracted from EXE_NAME
+  EXE_NAME: ${{ inputs.exe-name }}      # if not set, it will be extracted from setup.py or pyproject.toml
+  ZIP_NAME: ${{ inputs.zip-name }}          # if not set, it will be extracted from EXE_NAME
 
 jobs:
   build: 
