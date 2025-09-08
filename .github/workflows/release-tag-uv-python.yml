@@ -1,4 +1,4 @@
-name: Tag Bump
+name: Tag Auto Bump (UV)
 
 on:
   workflow_call:
