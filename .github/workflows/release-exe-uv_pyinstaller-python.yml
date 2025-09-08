@@ -22,6 +22,9 @@ on:
       exe-name:
         description: 'Name of executable'
         type: string
+      pyinstaller-commands: 
+        description: 'PyInstaller commands to run'
+        type: string
 env: 
   PROJECT_NAME: ${{ inputs.project-name }}
   PROJECT_VERSION: ${{ inputs.project-version }}
@@ -133,8 +136,12 @@ jobs:
         run: uv sync
       - name: Install PyInstaller
         run: uv add pyinstaller
-      - name: Build project with PyInstaller
-        run: uv run pyinstaller --name ${{ needs.get_defaults.outputs.exe-name }} src/jessy-test/main.py # replace this with the path to your script
+      - name: Build project with PyInstaller (default)
+        if: ${{ inputs.pyinstaller_commands == '' }}
+        run: uv run pyinstaller --name ${{ needs.get_defaults.outputs.exe-name }} src/${{ needs.get_defaults.outputs.project-name }}/main.py 
+      - name: Build project with PyInstaller (custom)
+        if: ${{ inputs.pyinstaller_commands != '' }}
+        run: uv run pyinstaller ${{ inputs.pyinstaller_commands }}
 
       ################################################################################
       #
