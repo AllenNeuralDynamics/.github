@@ -35,11 +35,13 @@ jobs:
         if: env.PROJECT_NAME == ''
       - name: Set PROJECT_NAME from extract_info (if not already set)
         id: set_project_name
+        shell: bash
         run: |
           PROJECT_NAME="${PROJECT_NAME:-${{ steps.extract_info.outputs.project-name }}}"
           echo "PROJECT_NAME=$PROJECT_NAME" >> "$GITHUB_ENV"
       - name: Set ZIP_NAME from extract_info (if not already set)
         id: set_zip_name
+        shell: bash
         run: |
           ZIP_NAME="${ZIP_NAME:-${{ steps.extract_info.outputs.project-name }}}"
           echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
