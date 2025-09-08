@@ -23,8 +23,23 @@ env:
   ZIP_NAME: ${{ inputs.zip-name }}      # if not set, it will be extracted from EXE_NAME
 
 jobs:
+  get_defaults: 
+    if: ${{ inputs.exe-name }} == '' || ${{ inputs.zip-name }} == ''
+    runs-on: 'ubuntu-latest'
+    outputs:
+      exe-name: ${{ steps.extract_info.outputs.project-name }}
+      zip-name: ${{ steps.extract_info.outputs.project-name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run extract_info 
+        # TODO: update to main after testing...
+        uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
+        id: extract_info
+        
   build: 
     runs-on: ${{ inputs.runner-label }}
+    needs: get_defaults
     outputs:
       zip-name: ${{ steps.export.outputs.zip-name }}
     env: 
@@ -36,18 +51,11 @@ jobs:
       #   SET PROJECT NAME AND ZIP NAME IF NOT PROVIDED
       #
       ################################################################################
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run extract_info only if EXE_NAME is not set
-        # TODO: update to main after testing...
-        uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
-        id: extract_info
-        if: env.EXE_NAME == '' 
       - name: Set EXE_NAME from extract_info (if not already set)
         id: set_project_name
         shell: bash
         run: |
-          EXE_NAME="${EXE_NAME:-${{ steps.extract_info.outputs.project-name }}}"
+          EXE_NAME="${EXE_NAME:-${{ needs.get_defaults.outputs.exe-name }}}"
           echo "EXE_NAME=$EXE_NAME" >> "$GITHUB_ENV"
       - name: Set ZIP_NAME from EXE_NAME (if not already set)
         id: set_zip_name
