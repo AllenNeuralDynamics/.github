@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Run extract_info only if PROJECT_NAME is not set
         # TODO: update to main after testing...
-        uses: github.com/AllenNeuralDynamics/.github/actions/extract_info@dev
+        uses: https://github.com/AllenNeuralDynamics/.github/actions/extract_info@dev
         id: extract_info
         if: env.ZIP_NAME == ''
       - name: Set PROJECT_NAME from extract_info (if not already set)
