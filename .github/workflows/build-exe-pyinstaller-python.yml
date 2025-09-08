@@ -1,9 +1,9 @@
-name: Build and Create exe Release
+name: Build EXE (pyInstaller)
 
 on:
   workflow_call:
     inputs: 
-      runner_label: 
+      runner-label: 
         description: 'Runner to use'
         type: string
         default: 'eng-tools'
@@ -24,7 +24,7 @@ env:
 
 jobs:
   build: 
-    runs-on: ${{ inputs.runner_label }}
+    runs-on: ${{ inputs.runner-label }}
     outputs:
       zip-name: ${{ steps.export.outputs.zip-name }}
     env: 
