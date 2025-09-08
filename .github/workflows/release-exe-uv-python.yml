@@ -99,8 +99,8 @@ jobs:
     runs-on: ${{ inputs.runner-label }}
     needs: get_defaults
     outputs:
-      project-name: ${{ needs.get_defaults.output.project-name }}
-      project-version: ${{ needs.get_defaults.output.project-version }}
+      project-name: ${{ needs.get_defaults.outputs.project-name }}
+      project-version: ${{ needs.get_defaults.outputs.project-version }}
       zip-name: ${{ needs.get_defaults.outputs.zip-name }}
       exe-name: ${{ needs.get_defaults.outputs.exe-name }}
       tag-name: ${{ needs.get_defaults.outputs.tag-name }}
@@ -153,8 +153,8 @@ jobs:
     runs-on: ${{ inputs.runner-label }}
     needs: build
     outputs:
-      project-name: ${{ needs.build.output.project-name }}
-      project-version: ${{ needs.build.output.project-version }}
+      project-name: ${{ needs.build.outputs.project-name }}
+      project-version: ${{ needs.build.outputs.project-version }}
       zip-name: ${{ needs.build.outputs.zip-name }}
       exe-name: ${{ needs.build.outputs.exe-name }}
       tag-name: ${{ needs.build.outputs.tag-name }}
