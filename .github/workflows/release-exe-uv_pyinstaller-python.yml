@@ -57,7 +57,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with: 
-          fetch-depth: "0"  # Gets entire commit history
+          fetch-depth: 0  # Gets entire commit history
       - name: Run extract_info 
         # TODO: update to main after testing...
         uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
