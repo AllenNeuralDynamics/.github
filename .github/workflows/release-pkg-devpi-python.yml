@@ -23,6 +23,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.ref_name }}
           fetch-depth: 0 # Gets entire commit history
       - name: Install UV 
         uses: astral-sh/setup-uv@v5
