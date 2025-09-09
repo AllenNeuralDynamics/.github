@@ -16,7 +16,10 @@ This workflow automatically bumps the version of a python project. It performs t
 
 ## Parameters
 
-**Inputs:** N/A
+**Inputs:** 
+
+- ``runner-label`` (optional): runner to use 
+  - defaults: "ubuntu-latest" 
 
 **Outputs:** 
 

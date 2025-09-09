@@ -3,7 +3,7 @@ name: Tag Auto Bump (UV)
 on:
   workflow_call:
     inputs: 
-      runner_label: 
+      runner-label: 
         description: 'Runner to use'
         type: string
         default: 'ubuntu-latest'
@@ -15,7 +15,7 @@ on:
 
 jobs:
   tag: 
-    runs-on: ${{ inputs.runner_label }}
+    runs-on: ${{ inputs.runner-label }}
     env: 
       UV_PYTHON_INSTALL_DIR: C:\ProgramData\AIBS_MPE\uv_python
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
