@@ -56,6 +56,8 @@ jobs:
       ################################################################################
       - name: Checkout code
         uses: actions/checkout@v4
+        with: 
+          fetch-depth: "0"  # Gets entire commit history
       - name: Run extract_info 
         # TODO: update to main after testing...
         uses: AllenNeuralDynamics/.github/.github/actions/extract_info@dev
@@ -111,6 +113,8 @@ jobs:
       UV_PYTHON_INSTALL_DIR: C:\ProgramData\AIBS_MPE\uv_python
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       ################################################################################
       #
       #   CLEAN ANY PREVIOUS BUILDS
