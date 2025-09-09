@@ -13,6 +13,8 @@ jobs:
     uses: AllenNeuralDynamics/.github/.github/workflows/test-lint-ruff-python.yml@dev # TODO: change to main after testing
   type_check:
     uses: AllenNeuralDynamics/.github/.github/workflows/test-type-mypy-python.yml@dev # TODO: change to main after testing 
+    with: 
+      mypy-commands: src # Enter custom mypy commands here
 
   # Run unit tests if lint and type check passes
   tests:
