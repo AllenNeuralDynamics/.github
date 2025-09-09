@@ -57,7 +57,7 @@ on:
 jobs: 
   publish: 
     needs: tag
-    uses: AllenNeuralDynamics/.github/.github/workflows/release-exe-uv_pyinstaller-python.yml@dev
+    uses: AllenNeuralDynamics/.github/.github/workflows/release-exe-uv_pyinstaller-python.yml@main
     with: 
       tag-name: ${{ github.ref }}
 ```
@@ -82,10 +82,10 @@ on:
 
 jobs: 
   tag: 
-    uses: AllenNeuralDynamics/.github/.github/workflows/release-tag-uv-python.yml@dev
+    uses: AllenNeuralDynamics/.github/.github/workflows/release-tag-uv-python.yml@main
   publish: 
     needs: tag
-    uses: AllenNeuralDynamics/.github/.github/workflows/release-exe-uv_pyinstaller-python.yml@dev
+    uses: AllenNeuralDynamics/.github/.github/workflows/release-exe-uv_pyinstaller-python.yml@main
     with: 
       project-version: ${{ needs.auto-tag.outputs.version }} 
       tag-name: v${{ needs.auto-tag.outputs.version }}
