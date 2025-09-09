@@ -1,4 +1,4 @@
-name: Run makefile
+name: Run makefile (UV)
 
 on: 
   workflow_call:
