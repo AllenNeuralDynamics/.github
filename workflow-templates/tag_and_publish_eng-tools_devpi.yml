@@ -9,15 +9,10 @@ on:
 jobs: 
   # Auto bump version and Tag
   tag: 
-    uses: AllenNeuralDynamics/.github/.github/workflows/tag.yml@main
-    with: 
-      runner_label: eng-tools
-    secrets: inherit
+    uses: AllenNeuralDynamics/.github/.github/workflows/release-tag-uv-python.yml@dev # TODO: change to main after testing
 
   # Publish to devpi on eng-tools
   publish: 
     needs: tag
-    uses: AllenNeuralDynamics/.github/.github/workflows/publish_devpi.yml@main
-    with: 
-      runner_label: eng-tools
+    uses: AllenNeuralDynamics/.github/.github/workflows/release-pkg-devpi-python.yml@dev # TODO: change to main after testing
     secrets: inherit

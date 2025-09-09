@@ -10,19 +10,12 @@ on:
 jobs: 
   # Lint check and Type check ran in parallel
   lint_check:
-    uses: AllenNeuralDynamics/.github/.github/workflows/lint.yml@main
-    with: 
-      runner_label: eng-tools
-
+    uses: AllenNeuralDynamics/.github/.github/workflows/test-lint-ruff-python.yml@dev # TODO: change to main after testing
   type_check:
-    uses: AllenNeuralDynamics/.github/.github/workflows/type.yml@main
-    with: 
-      runner_label: eng-tools
+    uses: AllenNeuralDynamics/.github/.github/workflows/test-type-mypy-python.yml@dev # TODO: change to main after testing 
 
   # Run unit tests if lint and type check passes
   tests:
     needs: [lint_check, type_check]
-    uses: AllenNeuralDynamics/.github/.github/workflows/test.yml@main
-    with: 
-      runner_label: eng-tools
+    uses: AllenNeuralDynamics/.github/.github/workflows/test-pytest-python.yml@dev # TODO: change to main after testing 
   
