@@ -7,6 +7,9 @@ on:
         description: 'Runner to use'
         type: string
         default: 'ubuntu-latest'
+      ruff-commands: 
+        description: 'ruff commands to run'
+        type: string
 
 jobs: 
   lint_check: 
@@ -17,4 +20,8 @@ jobs:
     - name: Install UV 
       uses: astral-sh/setup-uv@v5
     - name: Lint with Ruff 
+      if: ${{ inputs.ruff-commands == '' }}
       run: uv run ruff check
+    - name: Lint with Ruff (custom)
+      if: ${{ inputs.ruff-commands != '' }}
+      run: uv run ruff ${{ inputs.ruff-commands }}

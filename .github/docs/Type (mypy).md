@@ -14,7 +14,9 @@ This workflow runs ``mypy`` on the project with ``UV``.
 
 **Inputs:**
 
-- ``runner-label`` (optional): runner to use - default: to "eng-tools"
+- ``mypy-commands`` (required): mypy command to run
+- ``runner-label`` (optional): runner to use 
+  - default: to "eng-tools"
 
 **Outputs:** N/A
 
@@ -35,9 +37,11 @@ on:
 jobs: 
   type: 
     uses: AllenNeuralDynamics/.github/.github/workflows/test-type-mypy-python.yml@main
+    with:  
+      mypy-commands: src/mypackage --strict
 ```
 
 **Results:**
 
-- runs ``mypy`` on the project whenever a PR is created to merge into dev or main
+- runs ``mypy src/mypackage --strict`` on the project whenever a PR is created to merge into dev or main
 

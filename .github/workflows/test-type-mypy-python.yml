@@ -7,6 +7,10 @@ on:
         description: 'Runner to use'
         type: string
         default: 'ubuntu-latest'
+      mypy-commands: 
+        description: 'mypy commands to run'
+        required: true
+        type: string
 
 jobs: 
   type_check: 
@@ -18,4 +22,4 @@ jobs:
       uses: astral-sh/setup-uv@v5
     - name: Type check with mypy 
       run: |
-        uv run mypy src/mypackage --strict
+        uv run mypy ${{ inputs.mypy-commands }}
