@@ -1,0 +1,23 @@
+name: 'extract_info'
+description: 'Extract Project Name and Version from pyproject.toml'
+outputs:
+  project-name: 
+    description: "Project name extracted from pyproject.toml"
+    value: ${{ steps.get_project_info.outputs.name }}
+  project-version:
+    description: "Project version extracted from pyproject.toml"
+    value: ${{ steps.get_project_info.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Extract project name from pyproject.toml
+      id: get_project_info
+      shell: bash
+      run: |
+        project_block=$(awk '/^\[project\]/ {f=1; next} /^\[/ {f=0} f' pyproject.toml)
+        name=$(echo "$project_block" | grep -E '^name\s*=' | sed -E 's/name\s*=\s*"([^"]+)"/\1/')
+        version=$(echo "$project_block" | grep -E '^version\s*=' | sed -E 's/version\s*=\s*"([^"]+)"/\1/') 
+        echo "Project Name: $name"
+        echo "Project Version: $version"
+        echo "name=$name" >> "$GITHUB_OUTPUT"
+        echo "version=$version" >> "$GITHUB_OUTPUT"

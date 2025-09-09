@@ -1,6 +1,6 @@
 {
     "name": "Tag and Publish (devpi)",
-    "description": "Tag and publish project to local devpi",
+    "description": "Tag and publish project to local devpi. Users UV to build and publish to the python package.",
     "iconName": "mouse_robot",
     "categories": [
         "Python", "Publish"

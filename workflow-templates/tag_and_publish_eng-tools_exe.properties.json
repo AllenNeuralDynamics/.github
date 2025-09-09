@@ -1,6 +1,6 @@
 {
     "name": "Tag and Publish (release)",
-    "description": "Tag and publish project to eng-tools/release",
+    "description": "Tag and publish project to eng-tools/release and Github Releases",
     "iconName": "mouse_robot",
     "categories": [
         "Python", "Publish", "SIPE"

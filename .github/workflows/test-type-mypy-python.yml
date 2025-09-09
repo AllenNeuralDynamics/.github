@@ -1,4 +1,4 @@
-name: Python Type Check
+name: Type (mypy)
 
 on:
   workflow_call:
@@ -7,20 +7,19 @@ on:
         description: 'Runner to use'
         type: string
         default: 'ubuntu-latest'
+      mypy-commands: 
+        description: 'mypy commands to run'
+        required: true
+        type: string
 
 jobs: 
   type_check: 
     runs-on: ${{ inputs.runner_label }}
-    strategy: 
-      matrix:
-        python-version: [ '3.11', '3.12' ]
     steps: 
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Install UV - set python version to ${{ matrix.python-version }} 
+    - name: Install UV 
       uses: astral-sh/setup-uv@v5
-      with:
-        python-version: ${{ matrix.python-version }} 
     - name: Type check with mypy 
       run: |
-        uv run mypy src/mypackage --strict
+        uv run mypy ${{ inputs.mypy-commands }}

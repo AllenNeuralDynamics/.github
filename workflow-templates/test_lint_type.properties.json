@@ -1,6 +1,6 @@
 {
     "name": "Test Lint and Type Workflow",
-    "description": "Test lint and type check for python",
+    "description": "Test lint and type check for python with UV",
     "iconName": "mouse_robot",
     "categories": [
         "Python", "CI"

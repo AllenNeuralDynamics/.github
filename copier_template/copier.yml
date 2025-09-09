@@ -1,0 +1,27 @@
+_subdirectory: .
+_templates_suffix: .jinja
+
+
+workflow_name:  
+  type: str
+  help: "Name of the workflow - this will be the title of the wiki page (e.g. Lint (Ruff))"
+
+workflow_filename:
+  type: str
+  help: "Yaml file associated with workflow (e.g. test-lint-ruff-python.yml)"
+
+created_by: 
+  type: str
+  help: "Who created this workflow (e.g. Jessy Liao (SIPE))"
+
+
+message_after_copy: | 
+
+  ✅ Project {{ workflow_name }} Documentation has been successfully created!
+
+  👉 Next steps:
+    - Go to .github/docs/{{ workflow_name }}.md 
+    - Fill out the parameters section of the template
+    - Add an example of how to use this reusable workflow
+  
+  🎉 Once you confirmed everything is working, create a PR!

@@ -9,15 +9,16 @@ on:
 jobs: 
   # Auto bump version and Tag
   tag: 
-    uses: AllenNeuralDynamics/.github/.github/workflows/tag.yml@main
-    with: 
-      runner_label: eng-tools
-    secrets: inherit
+    uses: AllenNeuralDynamics/.github/.github/workflows/release-tag-uv-python.yml@dev # TODO: change to main after testing
 
   # Publish to eng-tools/release
   publish: 
     needs: tag
-    uses: AllenNeuralDynamics/.github/.github/workflows/publish_executable.yml@main
-    with: 
-      runner_label: eng-tools
-    secrets: inherit
+    uses: AllenNeuralDynamics/.github/.github/workflows/release-exe-uv_pyinstaller-python.yml@dev # TODO: change to main after testing
+    # with:
+    #   project-name: "test_project"
+    #   project-version: "1.0.0"
+    #   tag-name: "v1.0.0"
+    #   exe-name: "test_app"
+    #   zip-name: "test_app"
+    #   pyinstaller-commands: --name amazing_test_app src/test_project/main.py
