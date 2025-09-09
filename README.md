@@ -6,15 +6,21 @@ This repository contains all the reusable workflows and workflow templates for t
 
 ```
 .github
-├── .github/workflows <===================== REUSABLE WORKFLOWS HERE
-│   ├── test-lint-ruff-python.yml
-│   ├── build-pkg-uv-python.yml
-│   ├── release-engtools-python.yml
-│   ├── ...
+├── .github
+│   ├── workflows <========================= REUSABLE WORKFLOWS HERE
+|   │   ├── test-lint-ruff-python.yml
+|   │   ├── test-lint-ruff-python.yml
+|   │   ├── build-pkg-uv-python.yml
+|   │   ├── release-engtools-python.yml
+|   │   ├── ...
+|   ├── docs <============================== DOCS HERE
+│   ├── actions <=========================== COMPOSITE ACTIONS HERE
+|   │   ├── extract_info
+|   │   |   ├── action.yml
 ├── workflow-templates <==================== WORKFLOW TEMPLATES HERE
 │   ├── build-pkg-uv-python.yml
 │   ├── release-engtools-python.yml
-├── actions <=============================== COMPOSITE ACTIONS HERE
+|   ├── ...
 └── README.md
 ```
 
