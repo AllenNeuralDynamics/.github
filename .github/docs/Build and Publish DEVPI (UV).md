@@ -25,7 +25,7 @@ This workflow builds a python package and uses uv to upload it to devpi (SIPE's 
 
 **workflow.yml**
 ```yml
-name: Tag and Publish
+name: Publish DEVPI
 
 on:
   push:
@@ -34,7 +34,6 @@ on:
 
 jobs: 
   publish: 
-    needs: tag
     uses: AllenNeuralDynamics/.github/.github/workflows/release-pkg-devpi-python.yml@main
     with: 
       tag-name: ${{ github.ref }}

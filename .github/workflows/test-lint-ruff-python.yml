@@ -1,4 +1,4 @@
-name: lint (ruff)
+name: Lint (Ruff)
 
 on:
   workflow_call:

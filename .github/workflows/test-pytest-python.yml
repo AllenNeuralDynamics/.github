@@ -1,4 +1,4 @@
-name: test (pytest)
+name: Test (PyTest)
 
 on:
   workflow_call:
