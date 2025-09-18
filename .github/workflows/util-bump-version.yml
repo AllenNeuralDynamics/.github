@@ -1,0 +1,37 @@
+name: Version Bump
+
+on:
+  workflow_call:
+    inputs:
+      default-branch:
+        description: "Branch to bump (usually 'main')"
+        required: false
+        type: string
+        default: "main"
+    secrets:
+      repo-token:
+        description: "Token with write permission to push"
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.default-branch }}
+          fetch-depth: 0
+          token: ${{ secrets.repo-token }}
+      - name: Commitizen bump
+        id: cz
+        uses: commitizen-tools/commitizen-action@master
+        with:
+          github_token: ${{ secrets.repo-token }}
+      - name: Show new version
+        run: echo "Bumped to ${{ steps.cz.outputs.version }}"
