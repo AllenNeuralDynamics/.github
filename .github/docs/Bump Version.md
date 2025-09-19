@@ -8,7 +8,7 @@
 
 This workflow automatically bumps the project version using Commitizen, commits the change, and outputs the new version. It is designed to be triggered via `workflow_call` and supports specifying the branch to bump.
 
-**Created By:** [Your Name or Team]
+**Created By:** Yosef Bedaso
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 This workflow builds a Python package, creates a GitHub release from a tag, and optionally publishes the package to PyPI. It uses `uv` for building and publishing, and supports configurable Python versions.
 
-**Created By:** [Your Name or Team]
+**Created By:** Galen Lynch
 
 ## Parameters
 

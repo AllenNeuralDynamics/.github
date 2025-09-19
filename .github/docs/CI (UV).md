@@ -8,7 +8,7 @@
 
 This workflow runs continuous integration (CI) checks for a Python project using `uv`. It installs dependencies, runs linting, formatting, typing, docstring coverage, typo checks, unit tests, builds the package, and performs a smoke test on the built wheel. It is designed to be triggered via `workflow_call` and supports configurable OS, Python version, and package name.
 
-**Created By:** [Your Name or Team]
+**Created By:** Galen Lynch
 
 ## Parameters
 

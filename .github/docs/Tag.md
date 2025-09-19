@@ -8,7 +8,7 @@
 
 This workflow automatically bumps the project version, updates version references in source and metadata files, commits the changes, and creates a new Git tag. It is designed to be triggered via `workflow_call` and supports customizable default branches.
 
-**Created By:** [Your Name or Team]
+**Created By:** Jon Young
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 This workflow updates status badges (Python version, docstring coverage, and test coverage) in the `README.md` file based on the latest project state. It is designed to be triggered via `workflow_call` and supports configurable default branch and Python version.
 
-**Created By:** [Your Name or Team]
+**Created By:** Yosef Bedaso
 
 ## Parameters
 

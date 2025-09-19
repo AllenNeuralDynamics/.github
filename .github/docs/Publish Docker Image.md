@@ -8,7 +8,7 @@
 
 This workflow builds and publishes a Docker image to GitHub Container Registry (GHCR) whenever triggered via `workflow_call`. It supports custom Docker tags, branch-based tagging, and configurable Docker build contexts.
 
-**Created By:** [Your Name or Team]
+**Created By:** Yosef Bedaso
 
 ## Parameters
 
