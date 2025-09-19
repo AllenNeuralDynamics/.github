@@ -1,0 +1,80 @@
+name: Publish
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version for build"
+        required: false
+        type: string
+        default: "3.13"
+      tag-name:
+        description: "Git tag to release"
+        required: true
+        type: string
+      publish-to-pypi:
+        description: "Whether to publish to PyPI (true/false)"
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      repo-token:
+        description: "GitHub token for release creation"
+        required: true
+      pypi-token:
+        description: "PyPI API token"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-release-publish:
+    runs-on: ubuntu-latest
+    # only run on a tag push, or on a manual dispatch *where* the user has
+    # selected a tag ref (i.e. github.ref starts with refs/tags/)
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # on push this is already the tag ref; on dispatch you must choose
+          # the tag in the UI so github.ref is the tag
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ inputs.python-version }}
+          enable-cache: true
+      - name: Install project
+        run: uv sync
+      - name: Build
+        run: uv build
+      - name: Verify artifacts
+        run: ls -la dist/
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag-name }}
+          name: Release ${{ inputs.tag-name }}
+          generate_release_notes: true
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
+        env:
+          GITHUB_TOKEN: ${{ secrets.repo-token }}
+      - name: Publish to PyPI
+        if: ${{ inputs.publish-to-pypi }}
+        env:
+          pypi_token: ${{ secrets.pypi-token }}
+        run: |
+          if [ -z "$pypi_token" ]; then
+            echo "No PyPI token provided, skipping publish."
+          else
+            uv publish --token "$pypi_token"
+          fi
