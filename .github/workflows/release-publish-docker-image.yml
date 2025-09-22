@@ -8,11 +8,6 @@ on:
         default: main
         required: false
         type: string
-      dockerfile-context:
-        description: "Relative path to Dockerfile"
-        required: false
-        type: string
-        default: "."
       docker-tag:
         description: "Docker image tag to use"
         required: true
@@ -22,6 +17,11 @@ on:
         required: false
         type: string
         default: "latest"
+      working-directory:
+        description: Working directory for the CI tasks
+        required: false
+        type: string
+        default: '.'
     secrets:
       repo-token:
         description: "GitHub token for release creation"
@@ -31,6 +31,9 @@ jobs:
   publish-docker:
     name: Publish Docker image
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./${{ inputs.working-directory }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,7 +61,7 @@ jobs:
       - name: Build and push image to GitHub Container Registry
         uses: docker/build-push-action@v3
         with:
-          context: ${{ inputs.dockerfile-context }}
+          context: ./${{ inputs.working-directory }}
           push: true
           tags: |
             ghcr.io/${{ env.repo_owner }}/${{ env.repo_name }}:${{ inputs.docker-tag }}

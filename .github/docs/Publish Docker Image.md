@@ -16,7 +16,7 @@ This workflow builds and publishes a Docker image to GitHub Container Registry (
 
 - `default-branch` (optional): Default branch name  
   - default: `main`
-- `dockerfile-context` (optional): Relative path to Dockerfile  
+- `working-directory` (optional): Working directory for the CI tasks
   - default: `.`
 - `docker-tag` (required): Docker image tag to use
 - `branch-tag` (optional): Branch tag to use for Docker image  
@@ -72,7 +72,7 @@ jobs:
     uses: your-org/.github/.github/workflows/release-publish-docker-image.yml@main
     with:
       docker-tag: dev-2024-09-18
-      dockerfile-context: ./docker
+      working-directory: docker
       branch-tag: dev
     secrets:
       repo-token: ${{ secrets.GITHUB_TOKEN }}
