@@ -13,6 +13,11 @@ on:
         default: '3.10'
         required: false
         type: string
+      readme_path:
+        description: 'Path to the README.md file'
+        default: 'README.md'
+        required: false
+        type: string
     secrets:
       SERVICE_TOKEN:
         required: true
@@ -72,4 +77,4 @@ jobs:
       with:
         default_author: github_actions
         message: "ci: update badges [skip actions]"
-        add: '["README.md"]'
+        add: '[${{ inputs.readme_path }}]'

@@ -18,6 +18,8 @@ This workflow updates status badges (Python version, docstring coverage, and tes
   - default: `main`
 - `python-version` (optional): Python version to use for badge updates  
   - default: `3.10`
+- `readme_path` (optional): Path to the README.md file  
+  - default: `README.md`
 
 **Secrets:**
 
