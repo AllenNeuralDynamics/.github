@@ -34,4 +34,9 @@ jobs:
     - name: Run interrogate
       run: interrogate --verbose .  
     - name: Run tests and coverage
-      run: coverage run -m unittest discover && coverage report
+      run: |
+        if python -m pytest --version > /dev/null 2>&1; then
+          coverage run -m pytest && coverage report
+        else
+          coverage run -m unittest discover && coverage report
+        fi
