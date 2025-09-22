@@ -41,4 +41,4 @@ jobs:
 
 **Results:**
 
-- Installs dependencies, runs flake8 for linting, checks docstring coverage with interrogate, and runs unit tests with coverage reporting for the specified Python version.
+- Installs dependencies, runs flake8 for linting, checks docstring coverage with interrogate, and runs tests with coverage reporting for the specified Python version.
