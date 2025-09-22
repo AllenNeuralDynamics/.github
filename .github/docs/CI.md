@@ -15,6 +15,8 @@ This workflow runs continuous integration (CI) tasks for a Python project. It in
 **Inputs:**
 
 - `python-version` (required): Python version to use in the CI
+- `working-directory` (optional): Working directory for the CI tasks  
+  - default: `.`
 
 **Outputs:** N/A
 

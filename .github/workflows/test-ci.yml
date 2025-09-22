@@ -7,11 +7,19 @@ on:
         description: Python version to use in the CI
         required: true
         type: string
+      working-directory:
+        description: Working directory for the CI tasks
+        required: false
+        type: string
+        default: '.'
 
 jobs:
   ci:
     name: Run CI Tasks
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ inputs.python-version }}
