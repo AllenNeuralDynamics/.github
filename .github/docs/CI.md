@@ -8,7 +8,7 @@
 
 This workflow runs continuous integration (CI) tasks for a Python project. It installs dependencies, runs linting with flake8, checks docstring coverage with interrogate, and executes unit tests with coverage reporting. Designed to be triggered via `workflow_call` with a configurable Python version.
 
-**Created By:** Jon Young
+**Created By:** AIND Scientific Computing
 
 ## Parameters
 
