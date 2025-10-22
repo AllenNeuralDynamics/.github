@@ -12,6 +12,11 @@ on:
         default: main
         required: false
         type: string
+      update_files:
+        description: 'Whether to update version files'
+        default: 'false'
+        required: false
+        type: boolean
     secrets:
       SERVICE_TOKEN:
         required: true
@@ -44,16 +49,19 @@ jobs:
         echo "VERSION_FILE=$init_file" >> "$GITHUB_ENV"
         echo "VERSION=${{ steps.tag_version.outputs.new_version }}" >> "$GITHUB_ENV"
     - name: Update version file with new version
+      if: ${{ inputs.update_files }}
       run: |
         grep "__version__" "$VERSION_FILE"
         sed -i --debug --expression="s|__version__.*|__version__ = \"${{ env.VERSION }}\"|" "$VERSION_FILE"
     - name: Update version in CITATION.cff file
+      if: ${{ inputs.update_files }}
       run: |
         if [ -f CITATION.cff ]; then
           sed -i --debug --expression='s/^version: .*/version: "v${{ env.VERSION }}"/' CITATION.cff
           sed -i --debug --expression="s/^date-released: .*/date-released: $(date +%Y-%m-%d)/" CITATION.cff
         fi
     - name: Set files to commit
+      if: ${{ inputs.update_files }}
       run: |
         files_to_add="${{ env.VERSION_FILE }}"
         if [ -f CITATION.cff ]; then
@@ -64,6 +72,7 @@ jobs:
       id: output_version
       run: echo "new_version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
     - name: Commit and Push version bump
+      if: ${{ inputs.update_files }}
       uses: EndBug/add-and-commit@v9
       with:
         default_author: github_actions
