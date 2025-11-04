@@ -1,4 +1,4 @@
-name: Bump Version
+name: Bump And Tag
 
 on:
   workflow_call:
@@ -17,8 +17,8 @@ on:
         required: true
 
 jobs:
-  bump-version:
-    name: Bump version
+  bump-and-tag:
+    name: Bump version and Tag
     runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.output_version.outputs.new_version }}
@@ -69,3 +69,7 @@ jobs:
         default_author: github_actions
         message: "ci: version bump [skip actions]"
         add: ${{ env.FILES_TO_ADD }}
+    - name: Update tag
+      run: |
+        git tag "v${{ env.VERSION }}"
+        git push origin "v${{ env.VERSION }}"
