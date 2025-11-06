@@ -1,0 +1,27 @@
+name: Test (PyTest)
+
+on:
+  workflow_call:
+    inputs: 
+      runner_label: 
+        description: 'Runner to use'
+        type: string
+        default: 'ubuntu-latest'
+      pytest-commands: 
+        description: 'pytest commands to run'
+        type: string
+
+jobs: 
+  run-tests: 
+    runs-on: ${{ inputs.runner_label }}
+    steps: 
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install UV 
+      uses: astral-sh/setup-uv@v5
+    - name: Test with pytest
+      if: ${{ inputs.pytest-commands == '' }}
+      run: uv run pytest tests/
+    - name: Test with pytest (custom)
+      if: ${{ inputs.pytest-commands != '' }}
+      run: uv run pytest ${{ inputs.pytest-commands }}
