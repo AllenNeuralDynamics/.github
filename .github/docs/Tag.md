@@ -6,7 +6,7 @@
 
 **Description:**
 
-This workflow automatically bumps the project version, updates version references in source and metadata files, commits the changes, and creates a new Git tag. It is designed to be triggered via `workflow_call` and supports customizable default branches.
+This workflow extracts the current version from a Python package's `__init__.py` file (as defined in `pyproject.toml`), creates a Git tag with that version, and pushes it to the repository. It is designed to be triggered via `workflow_call` and supports customizable default branches.
 
 **Created By:** AIND Scientific Computing
 
@@ -19,11 +19,9 @@ This workflow automatically bumps the project version, updates version reference
 
 **Secrets:**
 
-- `SERVICE_TOKEN` (required): GitHub token with permissions to push commits and tags
+- `repo-token` (required): GitHub token with permissions to push tags
 
-**Outputs:**
-
-- `new_version`: The new version string after the bump
+**Outputs:** N/A
 
 ## Example
 
@@ -32,7 +30,9 @@ This workflow automatically bumps the project version, updates version reference
 name: Tag Release
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   tag:
@@ -40,9 +40,9 @@ jobs:
     with:
       default_branch: main
     secrets:
-      SERVICE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      repo-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 **Results:**
 
-- Bumps the version (default: patch), updates version in source and `CITATION.cff` (if present), commits the changes, and pushes a new Git tag to the repository.
+- Extracts the version from the package's `__init__.py` file, creates a Git tag with the format `v{version}`, and pushes it to the repository.
