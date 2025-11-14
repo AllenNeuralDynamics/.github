@@ -12,6 +12,11 @@ on:
         default: main
         required: false
         type: string
+      working-directory:
+        description: 'The working directory to run the job in'
+        required: false
+        type: string
+        default: '.'
     secrets:
       repo-token:
         required: true
@@ -22,9 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.output_version.outputs.new_version }}
+    defaults:
+      run:
+        working-directory: ./${{ inputs.working-directory }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
       with:
         ref: ${{ inputs.default_branch }}
         fetch-depth: 0

@@ -16,6 +16,8 @@ This workflow automatically bumps the project version using semantic versioning,
 
 - `default_branch` (optional): Default branch name  
   - default: `main`
+- `working-directory` (optional): The working directory to run the job in
+  - default: `.`
 
 **Secrets:**
 

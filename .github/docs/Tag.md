@@ -16,6 +16,8 @@ This workflow extracts the current version from a Python package's `__init__.py`
 
 - `default_branch` (optional): Default branch name  
   - default: `main`
+- `working-directory` (optional): The working directory to run the job in
+  - default: `.`
 
 **Secrets:**
 

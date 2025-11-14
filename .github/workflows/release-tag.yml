@@ -8,6 +8,11 @@ on:
         default: main
         required: false
         type: string
+      working-directory:
+        description: 'The working directory to run the job in'
+        required: false
+        type: string
+        default: '.'
     secrets:
       repo-token:
         required: true
@@ -16,6 +21,9 @@ jobs:
   tag:
     name: Create and Push Tag
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./${{ inputs.working-directory }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
