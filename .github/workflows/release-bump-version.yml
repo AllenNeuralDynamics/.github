@@ -1,0 +1,83 @@
+name: Bump And Tag
+
+on:
+  workflow_call:
+    outputs:
+      new_version:
+        description: 'The new version'
+        value: ${{ jobs.bump-version.outputs.new_version }}
+    inputs:
+      default_branch:
+        description: 'Default branch name'
+        default: main
+        required: false
+        type: string
+      working-directory:
+        description: 'The working directory to run the job in'
+        required: false
+        type: string
+        default: '.'
+    secrets:
+      repo-token:
+        required: true
+
+jobs:
+  bump-and-tag:
+    name: Bump version and Tag
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.output_version.outputs.new_version }}
+    defaults:
+      run:
+        working-directory: ./${{ inputs.working-directory }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+      with:
+        ref: ${{ inputs.default_branch }}
+        fetch-depth: 0
+        token: ${{ secrets.repo-token }}
+    - name: Compute new version number
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.repo-token }}
+        release_branches: ${{ inputs.default_branch }}
+        default_bump: patch
+        dry_run: true  # Perform dryrun first to calculate new version
+    - name: Get version file name set variables
+      run: |
+        pkg_name=$(grep -P 'version\h*=\h*\{\h*attr\h*=\h*\H*\h*\}' pyproject.toml | grep -oP '\w+.__version__')
+        init_file="./src/${pkg_name//.__version__}/__init__.py"
+        echo "VERSION_FILE=$init_file" >> "$GITHUB_ENV"
+        echo "VERSION=${{ steps.tag_version.outputs.new_version }}" >> "$GITHUB_ENV"
+    - name: Update version file with new version
+      run: |
+        grep "__version__" "$VERSION_FILE"
+        sed -i --debug --expression="s|__version__.*|__version__ = \"${{ env.VERSION }}\"|" "$VERSION_FILE"
+    - name: Update version in CITATION.cff file
+      run: |
+        if [ -f CITATION.cff ]; then
+          sed -i --debug --expression='s/^version: .*/version: "v${{ env.VERSION }}"/' CITATION.cff
+          sed -i --debug --expression="s/^date-released: .*/date-released: $(date +%Y-%m-%d)/" CITATION.cff
+        fi
+    - name: Set files to commit
+      run: |
+        files_to_add="${{ env.VERSION_FILE }}"
+        if [ -f CITATION.cff ]; then
+          files_to_add="$files_to_add CITATION.cff"
+        fi
+        echo "FILES_TO_ADD=$files_to_add" >> "$GITHUB_ENV"
+    - name: Set output
+      id: output_version
+      run: echo "new_version=${{ env.VERSION }}" >> "$GITHUB_OUTPUT"
+    - name: Commit and Push version bump
+      uses: EndBug/add-and-commit@v9
+      with:
+        default_author: github_actions
+        message: "ci: version bump [skip actions]"
+        add: ${{ env.FILES_TO_ADD }}
+    - name: Update tag
+      run: |
+        git tag "v${{ env.VERSION }}"
+        git push origin "v${{ env.VERSION }}"
