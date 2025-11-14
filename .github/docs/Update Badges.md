@@ -23,7 +23,7 @@ This workflow updates status badges (Python version, docstring coverage, and tes
 
 **Secrets:**
 
-- `SERVICE_TOKEN` (required): Token with write permission to push changes
+- `repo-token` (required): Token with write permission to push changes
 
 **Outputs:** N/A
 
@@ -43,7 +43,7 @@ jobs:
       default-branch: main
       python-version: "3.10"
     secrets:
-      SERVICE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      repo-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 **Results:**

@@ -14,12 +14,12 @@ on:
         required: false
         type: string
       working-directory:
-        description: Working directory for the CI tasks
+        description: 'Working directory for the CI tasks'
         required: false
         type: string
         default: '.'
     secrets:
-      SERVICE_TOKEN:
+      repo-token:
         required: true
 
 jobs:
@@ -30,11 +30,11 @@ jobs:
       run:
         working-directory: ./${{ inputs.working-directory }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         ref: ${{ inputs.default-branch }}
         fetch-depth: 0
-        token: ${{ secrets.SERVICE_TOKEN }}
+        token: ${{ secrets.repo-token }}
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
