@@ -5,7 +5,7 @@ on:
     outputs:
       new_version:
         description: 'The new version'
-        value: ${{ jobs.bump-version.outputs.new_version }}
+        value: ${{ jobs.bump-and-tag.outputs.new_version }}
     inputs:
       default_branch:
         description: 'Default branch name'
