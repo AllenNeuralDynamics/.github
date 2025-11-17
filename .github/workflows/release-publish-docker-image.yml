@@ -21,7 +21,7 @@ on:
         description: "Custom Docker image name (defaults to repository name)"
         required: false
         type: string
-        default: github.event.repository.name
+        default: ${{ github.event.repository.name }}
       working-directory:
         description: Working directory for the CI tasks
         required: false
