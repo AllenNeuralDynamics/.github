@@ -43,12 +43,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          ref: ${{ inputs.default_branch }}
+          ref: ${{ inputs.default-branch }}
       - name: Set branch tag
         run: |
-          if [ "${{ inputs.default_branch }}" == "main" ]; then
+          if [ "${{ inputs.default-branch }}" == "main" ]; then
             echo "branch_tag=latest" >> $GITHUB_ENV
-          elif [ "${{ inputs.default_branch }}" == "dev" ]; then
+          elif [ "${{ inputs.default-branch }}" == "dev" ]; then
             echo "branch_tag=dev" >> $GITHUB_ENV
           else
             echo "branch_tag=${{ inputs.branch-tag }}" >> $GITHUB_ENV
