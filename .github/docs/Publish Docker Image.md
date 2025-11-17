@@ -21,6 +21,8 @@ This workflow builds and publishes a Docker image to GitHub Container Registry (
 - `docker-tag` (required): Docker image tag to use
 - `branch-tag` (optional): Branch tag to use for Docker image  
   - default: `latest`
+- `image-name` (optional): Custom Docker image name 
+  - default: Repository name
 
 **Secrets:**
 
