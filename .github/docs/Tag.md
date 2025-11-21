@@ -23,7 +23,9 @@ This workflow extracts the current version from a Python package's `__init__.py`
 
 - `repo-token` (required): GitHub token with permissions to push tags
 
-**Outputs:** N/A
+**Outputs:**
+
+- `new_version`: The new version extracted from the package's `__init__.py` file
 
 ## Example
 
