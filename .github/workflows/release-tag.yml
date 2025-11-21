@@ -2,6 +2,10 @@ name: Tag
 
 on:
   workflow_call:
+    outputs:
+      new_version:
+        description: 'The new version'
+        value: ${{ jobs.tag.outputs.new_version }}
     inputs:
       default_branch:
         description: 'Default branch name'
@@ -21,6 +25,8 @@ jobs:
   tag:
     name: Create and Push Tag
     runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.output_version.outputs.new_version }}
     defaults:
       run:
         working-directory: ./${{ inputs.working-directory }}
@@ -37,6 +43,9 @@ jobs:
         init_file="./src/${pkg_name//.__version__}/__init__.py"
         pkg_version=$(grep -Po '[0-9]+\.[0-9]+\.[0-9]+' "$init_file")
         echo "tag=$pkg_version" >> "$GITHUB_ENV"
+    - name: Set output
+      id: output_version
+      run: echo "new_version=${{ env.tag }}" >> "$GITHUB_OUTPUT"
     - name: Create git tag
       run: |
         git tag "v${{ env.tag }}"
