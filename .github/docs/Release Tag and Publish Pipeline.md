@@ -16,7 +16,7 @@ This workflow uses [conventional commits](https://www.conventionalcommits.org/en
 | `feat!:` or `BREAKING CHANGE` | Major | `0.1.0` → `1.0.0` |
 | `chore:`, `docs:`, `style:` | No bump | — |
 
-After the version has been bumped, the workflow updates `pipeline/nextflow.config` with the version in `PIPELINE_VERSION` and the GitHub URL in `PIPELINE_URL`. These environment variables can be queried wherever the `processing.json` is created (add them to keys `pipeline_version` and `pipeline_url`).
+After the version has been bumped, the workflow updates `pipeline/nextflow.config` with the version in `GITHUB_VERSION` and the GitHub URL in `GITHUB_URL`. These environment variables can be queried wherever the `processing.json` is created (add them to keys `GITHUB_VERSION` and `GITHUB_URL`).
 
 ## Parameters
 
@@ -41,7 +41,7 @@ After the version has been bumped, the workflow updates `pipeline/nextflow.confi
 
 This workflow does not produce reusable outputs. Instead, it performs the following actions:
 
-- Updates `pipeline/nextflow.config` with `PIPELINE_VERSION` and `PIPELINE_URL`
+- Updates `pipeline/nextflow.config` with `GITHUB_VERSION` and `GITHUB_URL`
 - Commits the config changes with `[skip ci]` flag
 - Creates and pushes a Git tag (`v{version}`)
 - Creates a GitHub Release with auto-generated release notes
@@ -59,29 +59,22 @@ When you merge a PR or push directly to `main`, the workflow:
 3. Commits, tags, and creates a GitHub Release
 
 ```bash
-# Example: This commit triggers a minor version bump (0.1.0 -> 0.2.0)
-git commit -m "feat: add support for multi-sample processing"
+name: Release
 
-# Example: This commit triggers a patch version bump (0.2.0 -> 0.2.1)
-git commit -m "fix: correct output path handling"
+on:
+  push:
+    branches:
+      - main
 
-# Example: This commit triggers a major version bump (0.2.1 -> 1.0.0)
-git commit -m "feat!: redesign pipeline input schema"
+jobs:
+  release:
+    uses: aind/.github/.github/workflows/release-tag-and-publish-pipeline.yml@main
 ```
-
-**Manual trigger (workflow_dispatch):**
-
-You can also trigger a release manually from the GitHub Actions tab:
-
-1. Navigate to **Actions** → **Version Bump**
-2. Click **Run workflow**
-3. Optionally select a bump type (`patch`, `minor`, `major`) or leave empty for auto-detection
-4. Click **Run workflow**
 
 **Results:**
 
 - Calculates the new version based on conventional commits (or manual selection)
-- Updates `pipeline/nextflow.config` with `PIPELINE_VERSION` and `PIPELINE_URL`
+- Updates `pipeline/nextflow.config` with `GITHUB_VERSION` and `GITHUB_URL`
 - Commits the changes with message `ci: bump version to {version} [skip ci]`
 - Creates and pushes a Git tag with format `v{version}`
 - Creates a GitHub Release with auto-generated release notes
