@@ -1,0 +1,132 @@
+# Automatic semantic versioning workflow
+# Uses conventional commits to determine version bumps:
+#   - feat: -> minor version bump (0.1.0 -> 0.2.0)
+#   - fix:  -> patch version bump (0.1.0 -> 0.1.1)
+#   - BREAKING CHANGE or feat!: or fix!: -> major version bump (0.1.0 -> 1.0.0)
+#   - chore:, docs:, style:, refactor:, test: -> no version bump
+
+name: Version Bump
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type (leave empty for auto-detection from commits)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - patch
+          - minor
+          - major
+
+jobs:
+  version-bump:
+    name: Bump version and update config
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[skip actions]')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for tags
+
+      - name: Compute new version number
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: main
+          default_bump: ${{ github.event.inputs.bump_type || 'patch' }}
+          dry_run: true  # Calculate version without creating tag yet
+
+      - name: Check if version bump needed
+        id: check_bump
+        run: |
+          # Check if there's a new version to release
+          if [ "${{ steps.tag_version.outputs.new_tag }}" != "${{ steps.tag_version.outputs.previous_tag }}" ]; then
+            echo "bump=true" >> $GITHUB_OUTPUT
+            echo "New version: ${{ steps.tag_version.outputs.new_version }}"
+          else
+            echo "bump=false" >> $GITHUB_OUTPUT
+            echo "No version bump needed"
+          fi
+
+      - name: Update nextflow.config
+        if: steps.check_bump.outputs.bump == 'true'
+        run: |
+          NEW_VERSION="${{ steps.tag_version.outputs.new_version }}"
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}"
+          CONFIG_FILE="pipeline/nextflow.config"
+          
+          # Check if env block exists
+          if grep -q "^env {" "$CONFIG_FILE"; then
+            # Update existing PIPELINE_VERSION if it exists
+            if grep -q "PIPELINE_VERSION" "$CONFIG_FILE"; then
+              sed -i "s/PIPELINE_VERSION = .*/PIPELINE_VERSION = \"$NEW_VERSION\"/" "$CONFIG_FILE"
+            else
+              # Add PIPELINE_VERSION to existing env block
+              sed -i "/^env {/a\\    PIPELINE_VERSION = \"$NEW_VERSION\"" "$CONFIG_FILE"
+            fi
+            
+            # Update existing PIPELINE_URL if it exists
+            if grep -q "PIPELINE_URL" "$CONFIG_FILE"; then
+              sed -i "s|PIPELINE_URL = .*|PIPELINE_URL = \"$REPO_URL\"|" "$CONFIG_FILE"
+            else
+              # Add PIPELINE_URL to existing env block
+              sed -i "/^env {/a\\    PIPELINE_URL = \"$REPO_URL\"" "$CONFIG_FILE"
+            fi
+          else
+            # Add env block at the end of the file
+            echo "" >> "$CONFIG_FILE"
+            echo "env {" >> "$CONFIG_FILE"
+            echo "    PIPELINE_VERSION = \"$NEW_VERSION\"" >> "$CONFIG_FILE"
+            echo "    PIPELINE_URL = \"$REPO_URL\"" >> "$CONFIG_FILE"
+            echo "}" >> "$CONFIG_FILE"
+          fi
+          
+          echo "Updated $CONFIG_FILE with version $NEW_VERSION and URL $REPO_URL"
+          cat "$CONFIG_FILE"
+
+      - name: Commit and push version bump
+        if: steps.check_bump.outputs.bump == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: "ci: bump version to ${{ steps.tag_version.outputs.new_version }} [skip ci]"
+          add: pipeline/nextflow.config
+
+      - name: Create and push tag
+        if: steps.check_bump.outputs.bump == 'true'
+        run: |
+          git tag -a "v${{ steps.tag_version.outputs.new_version }}" -m "Release v${{ steps.tag_version.outputs.new_version }}"
+          git push origin "v${{ steps.tag_version.outputs.new_version }}"
+          echo "✅ Created and pushed tag: v${{ steps.tag_version.outputs.new_version }}"
+
+      - name: Create GitHub Release
+        if: steps.check_bump.outputs.bump == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.tag_version.outputs.new_version }}
+          name: Release v${{ steps.tag_version.outputs.new_version }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: No version bump needed
+        if: steps.check_bump.outputs.bump != 'true'
+        run: |
+          echo "ℹ️ No version bump needed based on commit messages."
+          echo "To trigger a version bump, use conventional commit prefixes:"
+          echo "  - feat: for new features (minor bump)"
+          echo "  - fix: for bug fixes (patch bump)"
+          echo "  - feat!: or BREAKING CHANGE for breaking changes (major bump)"
