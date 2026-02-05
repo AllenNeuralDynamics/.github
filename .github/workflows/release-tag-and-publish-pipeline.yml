@@ -65,27 +65,27 @@ jobs:
           
           # Check if env block exists
           if grep -q "^env {" "$CONFIG_FILE"; then
-            # Update existing GITHUB_VERSION if it exists
-            if grep -q "GITHUB_VERSION" "$CONFIG_FILE"; then
-              sed -i "s/GITHUB_VERSION = .*/GITHUB_VERSION = \"$NEW_VERSION\"/" "$CONFIG_FILE"
+            # Update existing PIPELINE_VERSION if it exists
+            if grep -q "PIPELINE_VERSION" "$CONFIG_FILE"; then
+              sed -i "s/PIPELINE_VERSION = .*/PIPELINE_VERSION = \"$NEW_VERSION\"/" "$CONFIG_FILE"
             else
-              # Add GITHUB_VERSION to existing env block
-              sed -i "/^env {/a\\    GITHUB_VERSION = \"$NEW_VERSION\"" "$CONFIG_FILE"
+              # Add PIPELINE_VERSION to existing env block
+              sed -i "/^env {/a\\    PIPELINE_VERSION = \"$NEW_VERSION\"" "$CONFIG_FILE"
             fi
             
-            # Update existing GITHUB_URL if it exists
-            if grep -q "GITHUB_URL" "$CONFIG_FILE"; then
-              sed -i "s|GITHUB_URL = .*|GITHUB_URL = \"$REPO_URL\"|" "$CONFIG_FILE"
+            # Update existing PIPELINE_URL if it exists
+            if grep -q "PIPELINE_URL" "$CONFIG_FILE"; then
+              sed -i "s|PIPELINE_URL = .*|PIPELINE_URL = \"$REPO_URL\"|" "$CONFIG_FILE"
             else
-              # Add GITHUB_URL to existing env block
-              sed -i "/^env {/a\\    GITHUB_URL = \"$REPO_URL\"" "$CONFIG_FILE"
+              # Add PIPELINE_URL to existing env block
+              sed -i "/^env {/a\\    PIPELINE_URL = \"$REPO_URL\"" "$CONFIG_FILE"
             fi
           else
             # Add env block at the end of the file
             echo "" >> "$CONFIG_FILE"
             echo "env {" >> "$CONFIG_FILE"
-            echo "    GITHUB_VERSION = \"$NEW_VERSION\"" >> "$CONFIG_FILE"
-            echo "    GITHUB_URL = \"$REPO_URL\"" >> "$CONFIG_FILE"
+            echo "    PIPELINE_VERSION = \"$NEW_VERSION\"" >> "$CONFIG_FILE"
+            echo "    PIPELINE_URL = \"$REPO_URL\"" >> "$CONFIG_FILE"
             echo "}" >> "$CONFIG_FILE"
           fi
           
