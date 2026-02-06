@@ -99,7 +99,9 @@ jobs:
         with:
           default_author: github_actions
           message: "ci: bump version to ${{ steps.changelog.outputs.version }} [skip ci]"
-          add: pipeline/nextflow.config
+          add: |
+            pipeline/nextflow.config
+            CHANGELOG.md
 
       - name: Create and push tag
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
