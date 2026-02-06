@@ -16,7 +16,7 @@ This workflow uses [conventional commits](https://www.conventionalcommits.org/en
 | `feat!:` or `BREAKING CHANGE` | Major | `0.1.0` → `1.0.0` |
 | `chore:`, `docs:`, `style:` | No bump | — |
 
-After the version has been bumped, the workflow updates `pipeline/nextflow.config` with the version in `PIPELINE_VERSION` and the GitHub URL in `PIPELINE_URL`. These environment variables can be queried wherever the `processing.json` is created (add them to keys `PIPELINE_VERSION` and `PIPELINE_URL`).
+After the version has been bumped, the workflow updates `pipeline/nextflow.config` with the version in `PIPELINE_VERSION`, the pipeline name in `PIPELINE_NAME` and the GitHub URL in `PIPELINE_URL`. These environment variables can be queried wherever the `processing.json` is created (add them to keys `PIPELINE_NAME`, `PIPELINE_VERSION` and `PIPELINE_URL`).
 
 ## Parameters
 
@@ -74,7 +74,7 @@ jobs:
 **Results:**
 
 - Calculates the new version based on conventional commits (or manual selection)
-- Updates `pipeline/nextflow.config` with `PIPELINE_VERSION` and `PIPELINE_URL`
+- Updates `pipeline/nextflow.config` with `PIPELINE_NAME`, `PIPELINE_VERSION` and `PIPELINE_URL`
 - Commits the changes with message `ci: bump version to {version} [skip ci]`
 - Creates and pushes a Git tag with format `v{version}`
 - Creates a GitHub Release with auto-generated release notes
