@@ -1,0 +1,32 @@
+name: Sync Issue Fields to Custom Project Board
+on:
+  projects_v2_item:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      item_id:
+        description: 'Item ID'
+        required: true
+      issue_number:
+        description: 'Issue Number'
+        required: true
+
+jobs:
+  sync-fields:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.projects_v2_item.project_node_id == vars.EXPECTED_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install UV 
+        uses: astral-sh/setup-uv@v5
+      - name: Sync dependencies
+        run: uv sync
+      - name: Sync issue fields
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ORG_NAME: ${{ github.repository_owner }}
+          PROJECT_ID: ${{ github.event.projects_v2_item.project_node_id || vars.EXPECTED_PROJECT_ID }}
+          ITEM_ID: ${{ github.event.projects_v2_item.node_id || inputs.item_id }}
+          ISSUE_ID: ${{ github.event.projects_v2_item.content_node_id || inputs.issue_number }}
+        # Testing...
+        run: uv run src\jessy-test\sync_project_fields.py 
