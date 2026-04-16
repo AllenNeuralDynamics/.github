@@ -1,0 +1,84 @@
+name: Link issue to cross-repo milestone parent
+
+on:
+  workflow_call:
+    inputs:
+      issue-number:
+        description: 'Issue number to link as a sub-issue'
+        required: true
+        type: number
+      issue-id:
+        description: 'Issue ID to link as a sub-issue'
+        required: true
+        type: number
+      milestone-description:
+        description: 'Milestone description containing the parent issue URL'
+        required: true
+        type: string
+      target-owner:
+        description: 'Owner of the repository containing the parent issue'
+        required: false
+        type: string
+        default: 'AllenNeuralDynamics'
+      target-repo:
+        description: 'Repository name containing the parent issue'
+        required: false
+        type: string
+        default: 'aind-scientific-computing'
+    secrets:
+      service-token:
+        required: true
+
+jobs:
+  link:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Link to parent issue
+        uses: actions/github-script@v9
+        env:
+          ISSUE_NUMBER: ${{ inputs.issue-number }}
+          ISSUE_ID: ${{ inputs.issue-id }}
+          TARGET_OWNER: ${{ inputs.target-owner }}
+          TARGET_REPO: ${{ inputs.target-repo }}
+          MILESTONE_DESC: ${{ inputs.milestone-description }}
+        with:
+          github-token: ${{ secrets.service-token }}
+          script: |
+            const issueNumber = parseInt(process.env.ISSUE_NUMBER);
+            const issueId = parseInt(process.env.ISSUE_ID);
+            const targetOwner = process.env.TARGET_OWNER;
+            const targetRepo = process.env.TARGET_REPO;
+            const url = process.env.MILESTONE_DESC;
+
+            const match = url?.match(/\/issues\/(\d+)$/);
+
+            if (!match) {
+              console.log(`Milestone description is not a roadmap URL: ${url}`);
+              return;
+            }
+
+            const parentNumber = parseInt(match[1]);
+
+            const { data: parent } = await github.rest.issues.get({
+              owner: targetOwner,
+              repo: targetRepo,
+              issue_number: parentNumber
+            });
+
+            if (!parent) {
+              console.log(`No issue found at ${url}`);
+              return;
+            }
+
+            await github.request("POST /repos/{owner}/{repo}/issues/{issue_number}/sub_issues", {
+              owner: targetOwner,
+              repo: targetRepo,
+              issue_number: parentNumber,
+              sub_issue_id: issueId,
+              headers: {
+                "X-GitHub-Api-Version": "2022-11-28"
+              }
+            });
+
+            console.log(`Linked issue #${issueNumber} as sub-issue of ${targetRepo}#${parentNumber}`);
