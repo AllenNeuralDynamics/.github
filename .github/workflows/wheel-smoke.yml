@@ -1,0 +1,67 @@
+name: Wheel Smoke Test
+
+on:
+  workflow_call:
+    inputs:
+      runner_label:
+        description: Runner to use
+        type: string
+        default: 'ubuntu-latest'
+      python-version:
+        description: Python version to build and smoke-test against
+        type: string
+        default: '3.12'
+      smoke-test-paths:
+        description: |
+          Space-separated list of files or directories copied into the smoke-test
+          sandbox alongside the built wheel. Typically `tests` so pytest has a
+          suite to run against the installed wheel.
+        type: string
+        default: 'tests'
+
+jobs:
+  smoke:
+    name: Build wheel and smoke-test
+    runs-on: ${{ inputs.runner_label }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          enable-cache: true
+
+      - name: Install project
+        run: uv sync
+
+      - name: Build wheel
+        run: uv build --wheel
+
+      - name: Smoke-test built wheel
+        shell: bash
+        run: |
+          TEMP_DIR="${{ runner.temp }}/wheeltest"
+          mkdir -p "$TEMP_DIR"
+          for path in ${{ inputs.smoke-test-paths }}; do
+            cp -r "$path" "$TEMP_DIR/" || echo "Warning: '$path' not found"
+          done
+          cp dist/*.whl "$TEMP_DIR/"
+          cd "$TEMP_DIR"
+
+          uv venv .venv
+
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            PY=".venv/Scripts/python.exe"
+          else
+            PY=".venv/bin/python"
+          fi
+
+          uv pip install --python "$PY" pytest *.whl
+          "$PY" -m pytest -q
