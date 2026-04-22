@@ -1,0 +1,95 @@
+name: Docs CI (Sphinx)
+
+on:
+  workflow_call:
+    inputs:
+      runner_label:
+        description: Runner to use
+        type: string
+        default: 'ubuntu-latest'
+      python-version:
+        description: Python version to use
+        type: string
+        default: '3.12'
+      docs-extra:
+        description: Optional pyproject `[project.optional-dependencies]` extra to install (e.g. `docs`). Leave empty to skip.
+        type: string
+        default: 'docs'
+      docs-path:
+        description: Path to the Sphinx source dir
+        type: string
+        default: 'docs'
+      output-dir:
+        description: Where to write built HTML
+        type: string
+        default: 'docs/_build/html'
+      fail-on-warnings:
+        description: Treat Sphinx warnings as errors (-W)
+        type: boolean
+        default: true
+      linkcheck:
+        description: Run `sphinx-build -b linkcheck` (non-blocking)
+        type: boolean
+        default: false
+      run-apidoc:
+        description: Run `sphinx-apidoc` before build
+        type: boolean
+        default: false
+      apidoc-args:
+        description: Args passed to `sphinx-apidoc`
+        type: string
+        default: '-o docs/api src'
+      artifact-name:
+        description: Name for the uploaded site artifact
+        type: string
+        default: 'site'
+
+jobs:
+  build-docs:
+    name: Build docs
+    runs-on: ${{ inputs.runner_label }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          enable-cache: true
+
+      - name: Install project + docs deps
+        run: |
+          if [ -n "${{ inputs.docs-extra }}" ]; then
+            uv sync --extra "${{ inputs.docs-extra }}"
+          else
+            uv sync
+          fi
+
+      - name: Generate API stubs (optional)
+        if: inputs.run-apidoc == true
+        run: uv run --frozen sphinx-apidoc ${{ inputs.apidoc-args }}
+
+      - name: Ensure autosummary dirs exist
+        run: mkdir -p "${{ inputs.docs-path }}/generated" "${{ inputs.docs-path }}/_autosummary" || true
+
+      - name: Build HTML
+        run: |
+          FLAGS=""
+          if [ "${{ inputs.fail-on-warnings }}" = "true" ]; then FLAGS="-W"; fi
+          uv run --frozen sphinx-build $FLAGS -b html "${{ inputs.docs-path }}" "${{ inputs.output-dir }}"
+
+      - name: Linkcheck (non-blocking)
+        if: inputs.linkcheck == true
+        run: uv run --frozen sphinx-build -b linkcheck "${{ inputs.docs-path }}" "${{ inputs.docs-path }}/_build/linkcheck" || true
+
+      - name: Upload built site as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.output-dir }}
