@@ -16,7 +16,7 @@ jobs:
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
     steps:  
       - name: Install UV
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.1.0
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Run makefile test
