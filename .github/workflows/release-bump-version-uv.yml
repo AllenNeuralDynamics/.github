@@ -53,7 +53,7 @@ jobs:
     - name: Update pyproject.toml and uv.lock with new version
       run: |
         uv version "${{ env.VERSION }}"
-        uv sync
+        uv lock
     - name: Update version in CITATION.cff file
       run: |
         if [ -f CITATION.cff ]; then

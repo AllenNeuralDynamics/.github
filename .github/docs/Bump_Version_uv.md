@@ -8,7 +8,7 @@
 
 This workflow automatically bumps the project version using semantic versioning, updates version references in the package's `pyproject.toml`, `uv.lock`, and `CITATION.cff` (if present), commits the changes, creates a Git tag with the new version, and pushes it to the repository. It is designed to be triggered via `workflow_call` and supports customizable default branches.
 
-It is assumed that the version is managed in the `pyproject.toml` file. The workflow will use `uv version` and `uv sync` to update the version in the `pyproject.toml` and `uv.lock` files.
+It is assumed that the version is managed in the `pyproject.toml` file. The workflow will use `uv version` and `uv lock` to update the version in the `pyproject.toml` and `uv.lock` files.
 
 **Created By:** AIND Scientific Computing
 
