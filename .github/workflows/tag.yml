@@ -16,7 +16,7 @@ jobs:
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
     steps: 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with: 
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -29,11 +29,11 @@ jobs:
           pre_release_branches: dev
           # custom_release_rules: 'fix:patch,feat:minor,breaking:major' 
       - name: Install UV 
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
       - name: Update Version in pyproject.toml
         run: uvx --from=toml-cli toml set --toml-path=pyproject.toml project.version ${{ steps.tag_version.outputs.new_version }}
       - name: Commit and push pyproject.toml version bump
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v10
         with:
           default_author: github_actions
           message: "ci: version bump"
