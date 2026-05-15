@@ -75,6 +75,7 @@ jobs:
       with:
         default_author: github_actions
         message: "ci: version bump [skip actions]"
+        cwd: ${{ inputs.working-directory }}
         add: ${{ env.FILES_TO_ADD }}
     - name: Update tag
       run: |
