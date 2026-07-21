@@ -1,0 +1,179 @@
+# Reusable workflow: Tag and Release
+#
+# Reads project name and version from pyproject.toml, creates a Git tag and
+# GitHub Release and optionally deploys docs to GitHub Pages.
+#
+# Usage (caller workflow):
+#  
+#   on:
+#     push:
+#       branches:
+#         - main
+#         - dev
+#     workflow_dispatch:
+#
+#   jobs:
+#     tag-and-release:
+#       uses: <org>/<repo>/.github/workflows/tag-release.yml@<ref>
+#       with:
+#         sync_command: uv sync                # optional, default: 'uv sync'
+#         fail_if_tag_exists: false            # optional, default: false
+#         build_docs: true                     # optional, default: true
+#         docs_build_command: make docs        # optional, default: 'make docs'
+#         docs_artifact_path: site             # optional, default: 'site'
+#       secrets:
+#         gh_token: ${{ secrets.YOUR_PAT }}    # optional, falls back to GITHUB_TOKEN
+#
+# To use this docs method, set up your repo to use GitHub Pages with the "GitHub Actions" source
+
+
+name: Tag And Release
+
+on:
+  workflow_call:
+    inputs:
+      sync_command:
+        description: 'Command to install dependencies and create environment'
+        required: false
+        type: string
+        default: 'uv sync'
+      fail_if_tag_exists:
+        description: 'Fail the workflow if the tag already exists, instead of skipping'
+        required: false
+        type: boolean
+        default: false
+      build_docs:
+        description: 'Whether to build and deploy documentation to GitHub Pages'
+        required: false
+        type: boolean
+        default: true
+      docs_build_command:
+        description: 'Command to build the documentation'
+        required: false
+        type: string
+        default: 'uv run --group docs mkdocs build'
+      docs_artifact_path:
+        description: 'Path to the built documentation artifact'
+        required: false
+        type: string
+        default: 'site'
+    secrets:
+      gh_token:
+        description: 'GitHub personal access token. Needed if you have private gh repo dependencies.'
+        required: false
+    outputs:
+      project_name:
+        value: ${{ jobs.extract_info.outputs.project_name }}
+      project_version:
+        value: ${{ jobs.extract_info.outputs.project_version }}
+      project_name_underscores:
+        value: ${{ jobs.extract_info.outputs.project_name_underscores }}
+      tag_name:
+        value: ${{ jobs.extract_info.outputs.tag_name }}
+      tag_already_exists:
+        value: ${{ jobs.extract_info.outputs.tag_already_exists }}
+
+jobs: 
+  extract_info:
+    runs-on: windows-latest
+    outputs:
+      project_name: ${{ steps.get_info.outputs.PACKAGE_NAME }}
+      project_version: ${{ steps.get_info.outputs.PACKAGE_VERSION }}
+      project_name_underscores: ${{ steps.get_info.outputs.PACKAGE_NAME_UNDERSCORES }}
+      tag_name: v${{ steps.get_info.outputs.PACKAGE_VERSION }}
+      tag_already_exists: ${{ steps.check_existing_tag.outputs.exists }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Get package name and version
+      id: get_info
+      run: |
+        $version = uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version
+        $package_name = uvx --from=toml-cli toml get --toml-path=pyproject.toml project.name
+        echo "PACKAGE_VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "PACKAGE_NAME=$package_name" >> $env:GITHUB_OUTPUT
+        echo "PACKAGE_NAME_UNDERSCORES=$package_name".Replace('-', '_') >> $env:GITHUB_OUTPUT
+        
+    - name: Check if tag exists
+      id: check_existing_tag
+      uses: mukunku/tag-exists-action@v1.6.0
+      with:
+        tag: v${{ steps.get_info.outputs.PACKAGE_VERSION }}
+
+
+  tag_and_release:
+    needs: extract_info
+    if: needs.extract_info.outputs.tag_already_exists == 'false' || inputs.fail_if_tag_exists
+    runs-on: windows-latest
+    steps:
+    - name: Fail if tag already exists
+      if: needs.extract_info.outputs.tag_already_exists == 'true'
+      run: |
+        Write-Error "Tag ${{ needs.extract_info.outputs.tag_name }} already exists."
+        exit 1
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Register the personal access token
+      run: echo "${{ secrets.gh_token || github.token }}" | gh auth login --with-token
+    - name: Configure the Git credential helper
+      run: gh auth setup-git
+
+    - name: Install dependencies
+      run: ${{ inputs.sync_command }}
+        
+    - name: Create Git tag
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a ${{ needs.extract_info.outputs.tag_name }} -m "${{ needs.extract_info.outputs.tag_name }}"
+        if ($LASTEXITCODE) { exit $LASTEXITCODE }
+        git push origin ${{ needs.extract_info.outputs.tag_name }}
+        if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.extract_info.outputs.tag_name }}
+        name: Release ${{ needs.extract_info.outputs.tag_name }}
+        generate_release_notes: true
+        prerelease: ${{ github.ref != 'refs/heads/main' }}
+
+  build-docs:
+    if: ${{ inputs.build_docs }}
+    needs: tag_and_release
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+      actions: write       # Necessary to cancel workflow executions
+      checks: write        # Necessary to write reports
+      pull-requests: write # Necessary to comment on PRs
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Build docs
+      run: ${{ inputs.docs_build_command }}
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ${{ inputs.docs_artifact_path }}
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

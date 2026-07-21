@@ -1,0 +1,210 @@
+# Reusable workflow: Tag and Publish
+#
+# Reads project name and version from pyproject.toml, creates a Git tag and
+# GitHub Release (skipped if the tag already exists), builds and tests an
+# executable, attaches artifacts to the release, and optionally calls the
+# SIPE gh-pull-agent API and deploys docs to GitHub Pages.
+#
+# Usage (caller workflow):
+#  
+#   on:
+#     push:
+#       branches:
+#         - main
+#         - dev
+#     workflow_dispatch:
+#
+#   jobs:
+#     tag-and-publish:
+#       uses: <org>/<repo>/.github/workflows/sipe-tag-build-publish.yml@<ref>
+#       with:
+#         auto_detect_artifacts_folder: dist   # optional, default: ''
+#         release_files: CHANGELOG.md          # optional, extra files to attach
+#         build_command: make exe              # optional, default: 'make exe'
+#         test_command: make test_exe          # optional, default: 'make test_exe'
+#         call_sipe_releases_api: true         # optional, default: true
+#         deploy_runner: eng-tools             # optional, default: 'eng-tools'
+#         api_base_url: http://...             # optional, default: SIPE endpoint
+#         build_docs: true                     # optional, default: true
+#         docs_build_command: make docs        # optional, default: 'make docs'
+#         docs_artifact_path: site             # optional, default: 'site'
+#       secrets:
+#         gh_token: ${{ secrets.YOUR_PAT }}    # optional, falls back to GITHUB_TOKEN
+#
+# Artifact detection (auto_detect_artifacts_folder):
+#   When set, every top-level item in that folder is included in the release.
+#   Folders are automatically zipped; files are attached as-is.
+#   Items listed in release_files are appended on top of the detected artifacts.
+
+# To use this docs method, set up your repo to use GitHub Pages with the "GitHub Actions" source
+
+name: Tag and Publish
+
+on:
+  workflow_call:
+    inputs:
+      sync_command:
+        description: 'Command to install dependencies and create environment'
+        required: false
+        type: string
+        default: 'uv sync'
+      build_command:
+        description: 'Command to build the executable'
+        required: false
+        type: string
+        default: 'make exe'
+      test_command:
+        description: 'Command to test the executable'
+        required: false
+        type: string
+        default: 'make test_exe'
+      auto_detect_artifacts_folder:
+        description: 'Folder to auto-detect artifacts for release'
+        required: false
+        type: string
+        default: 'dist'
+      release_files:
+        description: 'Newline-separated list of additional files to add to the release, alongside the auto-detected artifact.'
+        required: false
+        type: string
+        default: ''
+      call_sipe_releases_api: 
+        description: 'Whether to call the SIPE releases API after creating the release'
+        required: false
+        type: boolean
+        default: true
+      deploy_runner:
+        description: 'Runner label for the deployment job'
+        required: false
+        type: string
+        default: 'eng-tools'
+      api_base_url:
+        description: 'Base URL for the deployment API'
+        required: false
+        type: string
+        default: 'http://eng-tools/gh-pull-agent/api/v1beta/releases'
+      build_docs:
+        description: 'Whether to build and deploy documentation to GitHub Pages'
+        required: false
+        type: boolean
+        default: true
+      docs_build_command:
+        description: 'Command to build the documentation'
+        required: false
+        type: string
+        default: 'make docs'
+      docs_artifact_path:
+        description: 'Path to the built documentation artifact'
+        required: false
+        type: string
+        default: 'site'
+    secrets:
+      gh_token:
+        description: 'GitHub personal access token. Needed if you have private gh repo dependencies.'
+        required: false
+      
+jobs:
+  tag-release:
+    uses: ./.github/workflows/tag-release-sipe.yml
+    with:
+      sync_command: ${{ inputs.sync_command }}
+      build_docs: ${{ inputs.build_docs }}
+      docs_build_command: ${{ inputs.docs_build_command }}
+      docs_artifact_path: ${{ inputs.docs_artifact_path }}
+    secrets:
+      gh_token: ${{ secrets.gh_token }}
+
+  build_and_release:
+    needs: [tag-release]
+    if: needs.tag-release.outputs.tag_already_exists == 'false'
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+        
+    - name: Register the personal access token
+      run: echo "${{ secrets.gh_token || github.token }}" | gh auth login --with-token
+    - name: Configure the Git credential helper
+      run: gh auth setup-git
+
+    - name: Build executable
+      run: ${{ inputs.build_command }}
+
+    - name: Test executable
+      timeout-minutes: 5
+      run: ${{ inputs.test_command }}
+
+    - name: Find artifacts for release
+      if: inputs.auto_detect_artifacts_folder
+      id: find_artifacts
+      run: |
+        # List every top-level item under the auto-detect folder
+        if (-not (Test-Path -Path "${{ inputs.auto_detect_artifacts_folder }}" -PathType Container)) {
+          Write-Output "auto_detect_artifacts_folder '${{ inputs.auto_detect_artifacts_folder }}' not found, skipping."
+          exit 0
+        }
+        $items = Get-ChildItem -Path "${{ inputs.auto_detect_artifacts_folder }}" |
+          ForEach-Object { $_.FullName }
+        $items | ForEach-Object { Write-Output "Found: $_" }
+        $delimiter = [System.Guid]::NewGuid().ToString()
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "artifact_paths<<$delimiter"
+        $items | Add-Content -Path $env:GITHUB_OUTPUT
+        Add-Content -Path $env:GITHUB_OUTPUT -Value $delimiter
+
+    - name: Prepare release files
+      id: prepare_files
+      env:
+        RELEASE_FILES: ${{ inputs.release_files }}
+        FOUND_ARTIFACTS: ${{ steps.find_artifacts.outputs.artifact_paths }}
+      run: |
+        # Combine auto-detected artifacts with any explicitly provided release_files
+        # For each file: zip folders, pass files through as-is
+        $releaseFiles = @()
+        foreach ($file in (@($env:FOUND_ARTIFACTS, $env:RELEASE_FILES) -join "`n") -split '\r?\n' -ne '') {
+          if (Test-Path -Path $file -PathType Container) {
+            # Folder — zip its contents and substitute the zip path
+            $zipName = (Split-Path $file -Leaf) + ".zip"
+            Compress-Archive -Path "$file\*" -DestinationPath $zipName -Force
+            $releaseFiles += $zipName
+          } else {
+            # File — pass through as-is
+            $releaseFiles += $file
+          }
+        }
+        # Write the final file list as a multiline GITHUB_OUTPUT value
+        $delimiter = [System.Guid]::NewGuid().ToString()
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "files<<$delimiter"
+        $releaseFiles | Add-Content -Path $env:GITHUB_OUTPUT
+        Add-Content -Path $env:GITHUB_OUTPUT -Value $delimiter
+
+    - name: Add artifacts to release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ needs.tag-release.outputs.tag_name }}
+        fail_on_unmatched_files: true
+        files: ${{ steps.prepare_files.outputs.files }}
+
+  call-api:
+    if: ${{ inputs.call_sipe_releases_api }}
+    runs-on: ${{ inputs.deploy_runner }}
+    needs: [tag-release, build_and_release]
+    steps: 
+      - name: Trigger gh-pull-agent to pull latest release from this repo on eng-tools
+        run: |
+          $project_name = '${{ needs.tag-release.outputs.project_name_underscores }}'
+          $project_version = '${{ needs.tag-release.outputs.project_version }}'
+          $owner_name = '"${{ github.repository_owner }}"'
+          $repo_name = '"${{ github.event.repository.name }}"'
+          $tag_name = '"${{ needs.tag-release.outputs.tag_name }}"'
+          $json = @{
+            '"owner_name"' = $owner_name
+            '"repo_name"' = $repo_name
+            '"tag_name"' = $tag_name
+          } | ConvertTo-Json -Compress
+          & curl.exe -X PUT "${{ inputs.api_base_url }}/$project_name/$project_version" `
+            -H "accept: application/json" `
+            -H "Content-Type: application/json" `
+            -d $json
+          exit $LASTEXITCODE
