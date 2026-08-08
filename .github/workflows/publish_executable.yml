@@ -36,7 +36,7 @@ jobs:
       UV_TOOL_DIR: C:\ProgramData\AIBS_MPE\uv_python
     steps:
       - name: Install UV 
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v8.1.0
       - name: Echo extracted project info
         run: |
           echo "Project Name: ${{ needs.extract-info.outputs.project-name }}"
@@ -55,7 +55,7 @@ jobs:
       project-version: ${{ needs.build.outputs.project-version }}
     steps: 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             ${{ needs.build.outputs.project-name }}.zip
