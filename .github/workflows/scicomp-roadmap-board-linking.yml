@@ -1,0 +1,115 @@
+# Scientific Computing Roadmap — project board to issue linking
+#
+# The SciComp team tracks roadmap goals as issues in aind-scientific-computing,
+# organized on a GitHub Projects board (https://github.com/orgs/AllenNeuralDynamics/projects/54).
+# When someone changes a field on that board (status, dates, priority, etc.),
+# the change is only visible in the project's activity log — not on the issue itself.
+#
+# This workflow fixes that gap. It listens for field changes on the project board
+# and posts a comment on the linked issue recording who changed what. This gives
+# each roadmap issue a visible history of timeline and status changes.
+#
+# Why is this in the org-level .github repo?
+# GitHub project board events (projects_v2_item) only fire at the org level.
+# Workflows in individual repos like aind-scientific-computing can't receive them.
+#
+# Scope: this only acts on issues in aind-scientific-computing. Changes to items
+# from other repos on the board are ignored.
+#
+# DRY-RUN MODE: currently logs to the Actions tab only — no comments are posted.
+# To activate, change DRY_RUN below to false.
+
+name: Mirror project field changes to issue
+
+on:
+  projects_v2_item:
+    types: [edited]
+
+jobs:
+  mirror-to-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log or comment on linked issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            // ——— Configuration ———
+            const DRY_RUN = true;  // true = log only, false = post comments
+            const TARGET_REPO = "aind-scientific-computing";  // ignore issues in other repos
+
+            // Fields to watch. Only changes to these fields will trigger a comment.
+            // Add or remove field names to control what gets logged.
+            // Available fields on the board: Status, Expected Completion Quarter,
+            // Sub-issues progress, Team, Expected Start Date, Expected End Date,
+            // Priority, Platform/Modality
+            const WATCHED_FIELDS = [
+              'Status',
+              'Expected Start Date',
+              'Expected End Date',
+              'Expected Completion Quarter',
+              'Team',
+            ];
+
+            // ——— Guards ———
+            const change = context.payload.changes?.field_value;
+            if (!change) return;        // not a field edit (archive, reorder, etc.)
+            if (change.from == null) return;  // first time setting a field, not a change
+
+            // ——— Look up field name and linked issue in a single query ———
+            const { field, item } = await github.graphql(
+              `query($fieldId: ID!, $itemId: ID!) {
+                field: node(id: $fieldId) { ... on ProjectV2FieldCommon { name } }
+                item: node(id: $itemId) {
+                  ... on ProjectV2Item {
+                    content {
+                      ... on Issue { number repository { owner { login } name } }
+                    }
+                  }
+                }
+              }`,
+              {
+                fieldId: change.field_node_id,
+                itemId: context.payload.projects_v2_item.node_id,
+              }
+            );
+
+            const fieldName = field?.name;
+            if (!fieldName) return;
+            if (!WATCHED_FIELDS.includes(fieldName)) return;  // not a field we care about
+
+            const content = item?.content;
+            if (!content?.number) return;  // draft item, no linked issue
+            if (content.repository.name !== TARGET_REPO) return;  // wrong repo
+
+            // ——— Format the comment ———
+            const fmt = (v) => {
+              if (v == null) return '_(empty)_';
+              if (typeof v === 'object') return v.name ?? v.title ?? JSON.stringify(v);
+              return String(v);
+            };
+
+            const actor = context.payload.sender.login;
+            const body = [
+              `**Project field changed by @${actor}**`,
+              ``,
+              `| Field | From | To |`,
+              `|---|---|---|`,
+              `| ${fieldName} | ${fmt(change.from)} | ${fmt(change.to)} |`,
+            ].join('\n');
+
+            // ——— Dry run: log only ———
+            if (DRY_RUN) {
+              console.log("DRY RUN — would post this comment:");
+              console.log(body);
+              return;
+            }
+
+            // ——— Post the comment ———
+            await github.rest.issues.createComment({
+              owner: content.repository.owner.login,
+              repo: content.repository.name,
+              issue_number: content.number,
+              body,
+            });
+            console.log(`Posted comment on issue #${content.number}`);
