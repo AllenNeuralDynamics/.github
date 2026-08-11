@@ -1,0 +1,30 @@
+name: Update Wiki Sidebar
+# Generates a hierarchical wiki sidebar with https://github.com/adriantanasa/github-wiki-sidebar
+
+on: [gollum, workflow_dispatch]
+
+jobs:
+  update_wiki_sidebar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout wiki repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install github-wiki-sidebar
+        run: npm install -g github-wiki-sidebar
+
+      - name: Generate sidebar (_Sidebar.md)
+        working-directory: wiki
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          github-wiki-sidebar --silent --git-push
