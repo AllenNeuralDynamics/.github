@@ -1,0 +1,11 @@
+{
+    "name": "Sync App Panel",
+    "description": "Auto-generate CodeOcean app-panel.json from a library's BaseSettings or argparse class using auto-app-panel",
+    "iconName": "mouse_robot",
+    "categories": [
+        "Python", "CodeOcean", "CI"
+    ],
+    "filePatterns": [
+        ".codeocean/app-panel.json"
+    ]
+}
