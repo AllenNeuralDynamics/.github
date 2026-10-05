@@ -68,7 +68,7 @@ on:
 
 jobs:
   release:
-    uses: aind/.github/.github/workflows/release-tag-and-publish-pipeline.yml@main
+    uses: aind/.github/.github/workflows/release-tag-and-publish-pipeline.yml@v1
 ```
 
 **Results:**

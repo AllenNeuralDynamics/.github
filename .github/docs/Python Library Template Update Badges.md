@@ -43,7 +43,7 @@ on:
 
 jobs:
   update-badges:
-    uses: your-org/.github/.github/workflows/python_library_template_update_badges_v0_0_1.yml@main
+    uses: your-org/.github/.github/workflows/python_library_template_update_badges_v0_0_1.yml@v1
     with:
       default-branch: main
       python-version: "3.12"

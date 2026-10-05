@@ -34,7 +34,7 @@ on:
 
 jobs:
   release:
-    uses: AllenNeuralDynamics/.github/.github/workflows/commitizen-release-publish.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/commitizen-release-publish.yml@v1
     secrets: inherit
 ```
 

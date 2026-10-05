@@ -38,7 +38,7 @@ on:
 
 jobs:
   <job-name>:
-    uses: your-org/.github/.github/workflows/<workflow-file-name>.yml@main
+    uses: your-org/.github/.github/workflows/<workflow-file-name>.yml@v1
     with:
       <input-name>: <value>
     secrets:

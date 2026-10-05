@@ -10,19 +10,19 @@ on:
 jobs: 
   # Lint check and Type check ran in parallel
   lint_check:
-    uses: AllenNeuralDynamics/.github/.github/workflows/lint.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/lint.yml@v1
     with: 
       runner_label: eng-tools
 
   type_check:
-    uses: AllenNeuralDynamics/.github/.github/workflows/type.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/type.yml@v1
     with: 
       runner_label: eng-tools
 
   # Run unit tests if lint and type check passes
   tests:
     needs: [lint_check, type_check]
-    uses: AllenNeuralDynamics/.github/.github/workflows/test.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/test.yml@v1
     with: 
       runner_label: eng-tools
   

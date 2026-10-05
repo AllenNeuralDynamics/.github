@@ -38,7 +38,7 @@ on:
 
 jobs:
   update-badges:
-    uses: your-org/.github/.github/workflows/util-update-badges.yml@main
+    uses: your-org/.github/.github/workflows/util-update-badges.yml@v1
     with:
       default-branch: main
       python-version: "3.10"

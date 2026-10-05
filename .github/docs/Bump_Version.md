@@ -40,7 +40,7 @@ on:
 
 jobs:
   bump-and-tag:
-    uses: your-org/.github/.github/workflows/release-bump-version.yml@main
+    uses: your-org/.github/.github/workflows/release-bump-version.yml@v1
     with:
       default_branch: main
     secrets:

@@ -40,7 +40,7 @@ on:
 
 jobs:
   tag:
-    uses: your-org/.github/.github/workflows/release-tag.yml@main
+    uses: your-org/.github/.github/workflows/release-tag.yml@v1
     with:
       default_branch: main
     secrets:

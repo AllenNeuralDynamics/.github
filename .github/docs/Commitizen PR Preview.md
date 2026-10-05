@@ -38,7 +38,7 @@ on:
 
 jobs:
   preview:
-    uses: AllenNeuralDynamics/.github/.github/workflows/commitizen-pr-preview.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/commitizen-pr-preview.yml@v1
     secrets: inherit
 ```
 
