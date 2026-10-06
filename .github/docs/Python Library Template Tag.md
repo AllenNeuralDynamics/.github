@@ -45,7 +45,7 @@ on:
 
 jobs:
   tag:
-    uses: your-org/.github/.github/workflows/python_library_template_tag_v0_0_1.yml@main
+    uses: your-org/.github/.github/workflows/python_library_template_tag_v0_0_1.yml@v1
     with:
       default_branch: main
       app-id: ${{ vars.SEMANTIC_RELEASE_BOT_APP_ID }}

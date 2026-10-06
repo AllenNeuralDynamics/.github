@@ -1,0 +1,109 @@
+name: Release reusable workflows
+
+# Cuts a new semantic version of this repository's reusable workflows.
+#
+#   1. Finds the latest vX.Y.Z tag (0.0.0 if none exist yet)
+#   2. Bumps it according to the selected bump type
+#   3. Creates an immutable vX.Y.Z tag
+#   4. Force-moves the floating major tag vX to the same commit
+#   5. Publishes a GitHub Release with auto-generated notes
+#
+# Consumers reference workflows with:
+#   uses: AllenNeuralDynamics/.github/.github/workflows/<file>.yml@v1      # floating, gets non-breaking updates
+#   uses: AllenNeuralDynamics/.github/.github/workflows/<file>.yml@v1.2.3  # pinned
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      dry-run:
+        description: 'Compute the next version without tagging or releasing'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-reusable-workflows
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag ${{ inputs.bump }} release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Compute next version
+        id: version
+        run: |
+          set -euo pipefail
+          latest="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n 1)"
+          latest="${latest:-v0.0.0}"
+          IFS='.' read -r major minor patch <<< "${latest#v}"
+
+          case "${{ inputs.bump }}" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+
+          new="v${major}.${minor}.${patch}"
+          echo "previous=${latest}"        >> "$GITHUB_OUTPUT"
+          echo "version=${new}"            >> "$GITHUB_OUTPUT"
+          echo "major=v${major}"           >> "$GITHUB_OUTPUT"
+          echo "Previous: ${latest} -> Next: ${new} (major alias v${major})"
+
+      - name: Create and push tags
+        if: ${{ !inputs.dry-run }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          MAJOR: ${{ steps.version.outputs.major }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git tag -fa "$MAJOR"  -m "Release $VERSION"
+
+          git push origin "refs/tags/$VERSION"
+          git push --force origin "refs/tags/$MAJOR"
+
+      - name: Create GitHub release
+        if: ${{ !inputs.dry-run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          set -euo pipefail
+          args=(--title "$VERSION" --generate-notes)
+          if git rev-parse -q --verify "refs/tags/$PREVIOUS" >/dev/null; then
+            args+=(--notes-start-tag "$PREVIOUS")
+          fi
+          gh release create "$VERSION" "${args[@]}"
+
+      - name: Summary
+        run: |
+          {
+            echo "## Release ${{ steps.version.outputs.version }}"
+            echo
+            echo "- Previous: \`${{ steps.version.outputs.previous }}\`"
+            echo "- Major alias: \`${{ steps.version.outputs.major }}\`"
+            echo "- Dry run: \`${{ inputs.dry-run }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

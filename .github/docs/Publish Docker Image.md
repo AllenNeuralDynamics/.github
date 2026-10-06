@@ -45,7 +45,7 @@ on:
 
 jobs:
   publish-docker:
-    uses: your-org/.github/.github/workflows/release-publish-docker-image.yml@main
+    uses: your-org/.github/.github/workflows/release-publish-docker-image.yml@v1
     with:
       docker-tag: v1.0.0
     secrets:
@@ -71,7 +71,7 @@ on:
 
 jobs:
   publish-docker:
-    uses: your-org/.github/.github/workflows/release-publish-docker-image.yml@main
+    uses: your-org/.github/.github/workflows/release-publish-docker-image.yml@v1
     with:
       docker-tag: dev-2024-09-18
       working-directory: docker

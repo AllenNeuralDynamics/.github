@@ -41,7 +41,7 @@ on:
 jobs:
   link-issue:
     if: github.event.issue.milestone != null
-    uses: AllenNeuralDynamics/.github/.github/workflows/util-link-issues-by-milestone.yml@main
+    uses: AllenNeuralDynamics/.github/.github/workflows/util-link-issues-by-milestone.yml@v1
     with:
       issue-number: ${{ github.event.issue.number }}
       issue-id: ${{ github.event.issue.id }}

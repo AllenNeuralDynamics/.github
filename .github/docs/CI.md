@@ -34,7 +34,7 @@ on:
 
 jobs:
   ci:
-    uses: your-org/.github/.github/workflows/test-ci.yml@main
+    uses: your-org/.github/.github/workflows/test-ci.yml@v1
     with:
       python-version: "3.11"
 ```
