@@ -1,0 +1,68 @@
+name: Run CodeOcean Integration
+
+on:
+  workflow_call:
+    inputs:
+      test_commit:
+        description: Commit to test
+        required: true
+        type: string
+      co_capsule_id:
+        description: Capsule ID for the integration test
+        required: true
+        type: string
+      co_data_asset_ids:
+        description: Data asset IDs for the integration test
+        required: false
+        default: "[]"
+        type: string
+      cancel_on_failure:
+        description: Cancel all jobs when one fails
+        default: true
+        required: false
+        type: boolean
+      log_file:
+        description: Log file output by the CodeOcean capsule
+        default: "output"
+        required: false
+        type: string
+    secrets:
+      co_token:
+        description: 'CodeOcean API token for the integration test.'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  code-ocean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      TEST_COMMIT: ${{ inputs.test_commit }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Check out scripts
+        uses: actions/checkout@v4
+        with:
+          repository: AllenNeuralDynamics/.github
+          ref: ${{ github.workflow_ref }}
+          sparse-checkout: .github/scripts
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Submit jobs to Code Ocean
+        env:
+          CODEOCEAN_TOKEN: ${{ secrets.co_token }}
+          CAPSULE_ID: ${{ inputs.co_capsule_id }}
+          DATA_ASSET_IDS: ${{ inputs.co_data_asset_ids }}
+          LOG_FILE: ${{ inputs.log_file }}
+        run: >
+          uv run --no-project --with codeocean==0.17.0
+          --with aind-codeocean-dispatch==0.6.0
+          .github/scripts/run_co_integration.py
+          --capsule-id "$CAPSULE_ID"
+          --data-asset-ids "$DATA_ASSET_IDS"
+          --commit "$TEST_COMMIT"
+          --log-file "$LOG_FILE"
+          ${{ inputs.cancel_on_failure && '--cancel-on-failure' || '' }}
